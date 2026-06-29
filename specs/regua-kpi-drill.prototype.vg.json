@@ -1,5 +1,5 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
   "description": "PROTÓTIPO Fase 2 — drill da régua para projetos ofensores. Dados fictícios embutidos. Em Deneb: remover os 'values' do dataset e ligar os roles; trocar o signal 'width' por 'pbiContainerWidth'. Testável em vega.github.io/editor (o clique funciona lá).",
   "width": 760,
   "height": 360,
