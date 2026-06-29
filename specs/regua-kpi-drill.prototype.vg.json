@@ -1,0 +1,318 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "PROTÓTIPO Fase 2 — drill da régua para projetos ofensores. Dados fictícios embutidos. Em Deneb: remover os 'values' do dataset e ligar os roles; trocar o signal 'width' por 'pbiContainerWidth'. Testável em vega.github.io/editor (o clique funciona lá).",
+  "width": 760,
+  "height": 360,
+  "autosize": {"type": "none", "resize": true, "contains": "padding"},
+  "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
+
+  "signals": [
+    {"name": "totalWidth",   "update": "width"},
+    {"name": "labelWidth",   "value": 175},
+    {"name": "barAreaWidth", "update": "totalWidth - labelWidth - 8"},
+    {"name": "segW",         "update": "barAreaWidth / 5"},
+    {"name": "headerH",      "value": 26},
+    {"name": "rowH",         "value": 70},
+    {"name": "barH",         "value": 26},
+    {"name": "barOffY",      "value": 22},
+    {"name": "topPad",       "value": 46},
+    {"name": "projRowH",     "value": 40},
+
+    {
+      "name": "currentArea",
+      "value": null,
+      "on": [
+        {"events": "@areaRow:click", "update": "datum.IsTotal === 1 ? currentArea : datum.Area"},
+        {"events": "@backBtn:click", "update": "null"}
+      ]
+    }
+  ],
+
+  "data": [
+    {
+      "name": "dataset",
+      "values": [
+        {"Nivel": 1, "Area": "TI",          "OrdemFinal": 0, "Desvio": -8.4, "Nota": 2, "IsTotal": 0},
+        {"Nivel": 1, "Area": "Marketing",   "OrdemFinal": 1, "Desvio":  3.1, "Nota": 4, "IsTotal": 0},
+        {"Nivel": 1, "Area": "Operações",   "OrdemFinal": 2, "Desvio": -2.0, "Nota": 3, "IsTotal": 0},
+        {"Nivel": 1, "Area": "Total",       "OrdemFinal": 3, "Desvio": -3.5, "Nota": 3, "IsTotal": 1},
+
+        {"Nivel": 2, "Area": "TI",        "Projeto": "Migração ERP",      "Planejado": 500000, "Realizado": 640000, "Desvio": -28.0, "Nota": 1},
+        {"Nivel": 2, "Area": "TI",        "Projeto": "Upgrade Wi-Fi",     "Planejado":  80000, "Realizado":  95000, "Desvio": -18.7, "Nota": 2},
+        {"Nivel": 2, "Area": "TI",        "Projeto": "Data Lake",         "Planejado": 300000, "Realizado": 330000, "Desvio": -10.0, "Nota": 2},
+        {"Nivel": 2, "Area": "TI",        "Projeto": "Helpdesk",          "Planejado": 120000, "Realizado": 118000, "Desvio":   1.7, "Nota": 4},
+
+        {"Nivel": 2, "Area": "Marketing", "Projeto": "Rebranding",        "Planejado": 150000, "Realizado": 175000, "Desvio": -16.6, "Nota": 2},
+        {"Nivel": 2, "Area": "Marketing", "Projeto": "Campanha Verão",    "Planejado": 200000, "Realizado": 190000, "Desvio":   5.0, "Nota": 4},
+        {"Nivel": 2, "Area": "Marketing", "Projeto": "SEO",               "Planejado":  60000, "Realizado":  58000, "Desvio":   3.3, "Nota": 4},
+
+        {"Nivel": 2, "Area": "Operações", "Projeto": "Automação Linha 2", "Planejado": 250000, "Realizado": 300000, "Desvio": -20.0, "Nota": 1},
+        {"Nivel": 2, "Area": "Operações", "Projeto": "Logística Sul",     "Planejado": 400000, "Realizado": 415000, "Desvio":  -3.7, "Nota": 3},
+        {"Nivel": 2, "Area": "Operações", "Projeto": "Estoque",           "Planejado": 100000, "Realizado":  99000, "Desvio":   1.0, "Nota": 4}
+      ]
+    },
+
+    {
+      "name": "nivel1",
+      "source": "dataset",
+      "transform": [
+        {"type": "filter", "expr": "datum.Nivel === 1 && currentArea === null"},
+        {"type": "collect", "sort": {"field": "OrdemFinal"}},
+        {"type": "formula", "as": "rowY", "expr": "datum.OrdemFinal * rowH + headerH"}
+      ]
+    },
+    {
+      "name": "zonas",
+      "source": "nivel1",
+      "transform": [
+        {"type": "formula", "as": "zoneArr", "expr": "[1, 2, 3, 4, 5]"},
+        {"type": "flatten", "fields": ["zoneArr"], "as": ["notaZona"]}
+      ]
+    },
+    {
+      "name": "zoneMeta",
+      "values": [
+        {"n": 1, "label": "Crítico"},
+        {"n": 2, "label": "Ruim"},
+        {"n": 3, "label": "Atenção"},
+        {"n": 4, "label": "Bom"},
+        {"n": 5, "label": "Ótimo"}
+      ],
+      "transform": [
+        {"type": "filter", "expr": "currentArea === null"}
+      ]
+    },
+
+    {
+      "name": "nivel2",
+      "source": "dataset",
+      "transform": [
+        {"type": "filter", "expr": "datum.Nivel === 2 && datum.Area === currentArea"},
+        {"type": "formula", "as": "impacto", "expr": "datum.Realizado - datum.Planejado"},
+        {"type": "formula", "as": "absImpacto", "expr": "abs(datum.impacto)"},
+        {"type": "collect", "sort": {"field": "Desvio", "order": "ascending"}},
+        {"type": "window", "ops": ["row_number"], "as": ["idx"]},
+        {"type": "formula", "as": "rowY", "expr": "(datum.idx - 1) * projRowH + topPad"}
+      ]
+    },
+    {
+      "name": "navState",
+      "values": [{}],
+      "transform": [
+        {"type": "filter", "expr": "currentArea !== null"}
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "colorScale",
+      "type": "ordinal",
+      "domain": [1, 2, 3, 4, 5],
+      "range": ["#e15759", "#ED8B00", "#fcad04", "#00b2a9", "#009e47"]
+    },
+    {
+      "name": "xImpacto",
+      "type": "linear",
+      "domain": {"data": "nivel2", "field": "absImpacto"},
+      "domainMin": 0,
+      "range": [0, {"signal": "barAreaWidth - 150"}],
+      "nice": true
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "text",
+      "from": {"data": "zoneMeta"},
+      "encode": {
+        "enter": {
+          "align":      {"value": "center"},
+          "baseline":   {"value": "middle"},
+          "fontSize":   {"value": 10},
+          "fontWeight": {"value": "bold"}
+        },
+        "update": {
+          "x":     {"signal": "labelWidth + (datum.n - 0.5) * segW"},
+          "y":     {"signal": "headerH / 2"},
+          "text":  {"field": "label"},
+          "fill":  {"signal": "scale('colorScale', datum.n)"},
+          "limit": {"signal": "segW - 4"}
+        }
+      }
+    },
+
+    {
+      "type": "rect",
+      "name": "areaRow",
+      "from": {"data": "nivel1"},
+      "encode": {
+        "enter": {
+          "fill":        {"value": "#000000"},
+          "fillOpacity": {"value": 0.001},
+          "cursor":      {"signal": "datum.IsTotal === 1 ? 'default' : 'pointer'"}
+        },
+        "update": {
+          "x":      {"value": 0},
+          "width":  {"signal": "totalWidth"},
+          "y":      {"signal": "datum.rowY"},
+          "height": {"signal": "rowH"}
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "from": {"data": "nivel1"},
+      "encode": {
+        "enter": {"stroke": {"value": "#e0e0e0"}, "strokeWidth": {"value": 1}},
+        "update": {
+          "x":       {"value": 0},
+          "x2":      {"signal": "totalWidth"},
+          "y":       {"field": "rowY"},
+          "opacity": {"signal": "datum.IsTotal === 1 ? 0 : 0.8"}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "zonas"},
+      "encode": {
+        "enter": {"strokeWidth": {"value": 1.5}, "cornerRadius": {"value": 3}},
+        "update": {
+          "x":           {"signal": "labelWidth + (datum.notaZona - 1) * segW"},
+          "width":       {"signal": "segW - 2"},
+          "y":           {"signal": "datum.rowY + barOffY"},
+          "height":      {"signal": "barH"},
+          "fill":        {"signal": "scale('colorScale', datum.notaZona)"},
+          "fillOpacity": {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
+          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"},
+          "tooltip":     {"signal": "{'Área': datum.Area, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--'}"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "nivel1"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}},
+        "update": {
+          "x":          {"value": 0},
+          "y":          {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text":       {"field": "Area"},
+          "fontSize":   {"signal": "datum.IsTotal === 1 ? 13 : 11"},
+          "fontWeight": {"signal": "datum.IsTotal === 1 ? 'bold' : 'normal'"},
+          "limit":      {"signal": "labelWidth - 6"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "nivel1"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "top"}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":        {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"},
+          "y":        {"signal": "datum.rowY + 2"},
+          "text":     {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"},
+          "fontSize": {"signal": "datum.IsTotal === 1 ? 16 : 13"},
+          "fill":     {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "from": {"data": "nivel1"},
+      "encode": {
+        "enter": {"shape": {"value": "triangle-up"}, "stroke": {"value": "white"}, "strokeWidth": {"value": 1}},
+        "update": {
+          "x":       {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : -999"},
+          "y":       {"signal": "datum.rowY + barOffY + barH + 9"},
+          "size":    {"signal": "min(segW * 14, 350)"},
+          "fill":    {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"},
+          "opacity": {"signal": "isValid(datum.Nota) ? 1 : 0"}
+        }
+      }
+    },
+
+    {
+      "type": "group",
+      "name": "backBtn",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}},
+        "update": {
+          "x":            {"value": 0},
+          "y":            {"value": 6},
+          "width":        {"value": 86},
+          "height":       {"value": 24},
+          "fill":         {"value": "#f0f0f0"},
+          "stroke":       {"value": "#cccccc"},
+          "cornerRadius": {"value": 4}
+        }
+      },
+      "marks": [
+        {
+          "type": "text",
+          "encode": {
+            "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fill": {"value": "#444444"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+            "update": {"x": {"value": 43}, "y": {"value": 12}, "text": {"value": "← Voltar"}}
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 13}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":    {"value": 98},
+          "y":    {"value": 18},
+          "text": {"signal": "'Projetos ofensores — ' + currentArea"}
+        }
+      }
+    },
+
+    {
+      "type": "rect",
+      "from": {"data": "nivel2"},
+      "encode": {
+        "enter": {"cornerRadius": {"value": 3}},
+        "update": {
+          "x":       {"signal": "labelWidth"},
+          "width":   {"signal": "max(scale('xImpacto', datum.absImpacto), 2)"},
+          "y":       {"signal": "datum.rowY"},
+          "height":  {"value": 24},
+          "fill":    {"signal": "scale('colorScale', datum.Nota)"},
+          "tooltip": {"signal": "{'Projeto': datum.Projeto, 'Planejado': format(datum.Planejado, '$,.0f'), 'Realizado': format(datum.Realizado, '$,.0f'), 'Impacto': format(datum.impacto, '+$,.0f'), 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "nivel2"},
+      "encode": {
+        "enter": {"align": {"value": "right"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 11}},
+        "update": {
+          "x":     {"signal": "labelWidth - 8"},
+          "y":     {"signal": "datum.rowY + 12"},
+          "text":  {"field": "Projeto"},
+          "limit": {"signal": "labelWidth - 12"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "nivel2"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":    {"signal": "labelWidth + max(scale('xImpacto', datum.absImpacto), 2) + 8"},
+          "y":    {"signal": "datum.rowY + 12"},
+          "text": {"signal": "'R$ ' + replace(format(datum.absImpacto, ',.0f'), /,/g, '.') + '  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
+          "fill": {"signal": "scale('colorScale', datum.Nota)"}
+        }
+      }
+    }
+  ]
+}
