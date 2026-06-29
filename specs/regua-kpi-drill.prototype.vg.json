@@ -90,7 +90,7 @@
         {"type": "filter", "expr": "datum.Nivel === 2 && datum.Area === currentArea"},
         {"type": "formula", "as": "impacto", "expr": "datum.Realizado - datum.Planejado"},
         {"type": "formula", "as": "absImpacto", "expr": "abs(datum.impacto)"},
-        {"type": "collect", "sort": {"field": "Desvio", "order": "ascending"}},
+        {"type": "collect", "sort": {"field": "absImpacto", "order": "descending"}},
         {"type": "window", "ops": ["row_number"], "as": ["idx"]},
         {"type": "formula", "as": "rowY", "expr": "(datum.idx - 1) * projRowH + topPad"}
       ]

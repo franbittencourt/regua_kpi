@@ -37,11 +37,49 @@ caiu (Nota), com o Desvio em % e um ponteiro (triângulo) na zona vencedora.
 - **Ponteiro com tamanho limitado** (`min(segW*14, 350)`) para não inflar em
   containers largos.
 
-## Próximas fases (planejado)
+## Fase 2 — Drill para projetos ofensores
 
-- **Fase 2 — Drill-down (Opção A).** Manter a régua como nível 1 e, ao clicar
-  numa Área, transicionar para um gráfico de barras de detalhe no mesmo visual
-  (signal `currentArea` + grupos de marks alternados + botão voltar), na linha
-  da mecânica de hierarchical bar chart. Exige os dois níveis no mesmo dataset.
-- **Fase 3 — Medidas de detalhe.** Adicionar `Nivel`, `AreaPai`, `Item` e as
-  métricas por item para alimentar o nível 2.
+`specs/regua-kpi-drill.prototype.vg.json` — protótipo com dados fictícios
+embutidos. Clique numa linha de área → a régua dá lugar a barras horizontais
+dos projetos daquela área, **ordenados por maior impacto em R$** (o que move o
+desvio). Botão "← Voltar" reseta. Testável em vega.github.io/editor.
+
+Mecânica (Opção A): signal `currentArea` (inicia `null`); clique na linha seta a
+área, "Voltar" volta a `null`. Os dois níveis convivem no mesmo dataset — o
+clique só filtra no cliente, sem nova query.
+
+### Contrato de dados (nomes esperados pelo Deneb)
+
+Tudo numa única tabela "empilhada" alimentando o visual. Campos por nível:
+
+**Nível 1 — régua (uma linha por área):**
+
+| Campo        | Tipo    | Descrição                                          |
+|--------------|---------|----------------------------------------------------|
+| `Nivel`      | inteiro | **1** para estas linhas                            |
+| `Area`       | texto   | Nome da área (rótulo e chave de drill)             |
+| `OrdemFinal` | inteiro | Ordem vertical (0, 1, 2…)                          |
+| `Desvio`     | número  | Desvio % da área                                   |
+| `Nota`       | 1–5     | Zona vencedora                                     |
+| `IsTotal`    | 0/1     | 1 = linha de total (não dá drill)                  |
+
+**Nível 2 — projetos (uma linha por projeto):**
+
+| Campo        | Tipo    | Descrição                                          |
+|--------------|---------|----------------------------------------------------|
+| `Nivel`      | inteiro | **2** para estas linhas                            |
+| `Area`       | texto   | Área pai (mesmo valor da área do nível 1)          |
+| `Projeto`    | texto   | Nome do projeto (rótulo da barra)                  |
+| `Planejado`  | número  | Valor planejado/alocado                            |
+| `Realizado`  | número  | Valor realizado                                    |
+| `Desvio`     | número  | Desvio % do projeto (rótulo de severidade)         |
+| `Nota`       | 1–5     | Cor da barra                                       |
+
+O impacto em R$ (`Realizado − Planejado`) e a ordenação são calculados dentro do
+spec — não precisa medida nova para isso. Convenção de sinal usada: gastar mais
+que o planejado → `Desvio` negativo (ofensor).
+
+## Fase 3 — pendente
+
+Substituir os `values` embutidos do protótipo pela tabela real (roles do Deneb)
+e trocar o signal `width` por `pbiContainerWidth`.
