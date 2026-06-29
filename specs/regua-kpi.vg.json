@@ -1,0 +1,159 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "autosize": {"type": "none", "resize": true, "contains": "padding"},
+  "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
+
+  "signals": [
+    {"name": "totalWidth",   "update": "pbiContainerWidth"},
+    {"name": "labelWidth",   "value": 155},
+    {"name": "barAreaWidth", "update": "totalWidth - labelWidth - 8"},
+    {"name": "segW",         "update": "barAreaWidth / 5"},
+    {"name": "headerH",      "value": 26},
+    {"name": "rowH",         "value": 70},
+    {"name": "barH",         "value": 26},
+    {"name": "barOffY",      "value": 22}
+  ],
+
+  "data": [
+    {
+      "name": "dataset",
+      "transform": [
+        {"type": "collect", "sort": {"field": "OrdemFinal"}},
+        {"type": "formula", "as": "rowY", "expr": "datum.OrdemFinal * rowH + headerH"}
+      ]
+    },
+    {
+      "name": "zonas",
+      "source": "dataset",
+      "transform": [
+        {"type": "formula", "as": "zoneArr", "expr": "[1, 2, 3, 4, 5]"},
+        {"type": "flatten", "fields": ["zoneArr"], "as": ["notaZona"]}
+      ]
+    },
+    {
+      "name": "zoneMeta",
+      "values": [
+        {"n": 1, "label": "Crítico"},
+        {"n": 2, "label": "Ruim"},
+        {"n": 3, "label": "Atenção"},
+        {"n": 4, "label": "Bom"},
+        {"n": 5, "label": "Ótimo"}
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "colorScale",
+      "type": "ordinal",
+      "domain": [1, 2, 3, 4, 5],
+      "range": ["#e15759", "#ED8B00", "#fcad04", "#00b2a9", "#009e47"]
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "text",
+      "from": {"data": "zoneMeta"},
+      "encode": {
+        "enter": {
+          "x":          {"signal": "labelWidth + (datum.n - 0.5) * segW"},
+          "y":          {"signal": "headerH / 2"},
+          "text":       {"field": "label"},
+          "align":      {"value": "center"},
+          "baseline":   {"value": "middle"},
+          "fontSize":   {"value": 10},
+          "fontWeight": {"value": "bold"},
+          "fill":       {"signal": "scale('colorScale', datum.n)"},
+          "limit":      {"signal": "segW - 4"}
+        }
+      }
+    },
+
+    {
+      "type": "rule",
+      "from": {"data": "dataset"},
+      "encode": {
+        "enter": {
+          "x":           {"value": 0},
+          "x2":          {"signal": "totalWidth"},
+          "y":           {"field": "rowY"},
+          "stroke":      {"value": "#e0e0e0"},
+          "strokeWidth": {"value": 1},
+          "opacity":     {"signal": "datum.IsTotal === 1 ? 0 : 0.8"}
+        }
+      }
+    },
+
+    {
+      "type": "rect",
+      "from": {"data": "zonas"},
+      "encode": {
+        "enter": {
+          "x":            {"signal": "labelWidth + (datum.notaZona - 1) * segW"},
+          "width":        {"signal": "segW - 2"},
+          "y":            {"signal": "datum.rowY + barOffY"},
+          "height":       {"signal": "barH"},
+          "fill":         {"signal": "scale('colorScale', datum.notaZona)"},
+          "fillOpacity":  {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
+          "stroke":       {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"},
+          "strokeWidth":  {"value": 1.5},
+          "cornerRadius": {"value": 3},
+          "tooltip":      {"signal": "{'Área': datum.Area, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--'}"}
+        }
+      }
+    },
+
+    {
+      "type": "text",
+      "from": {"data": "dataset"},
+      "encode": {
+        "enter": {
+          "x":          {"value": 0},
+          "y":          {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text":       {"field": "Area"},
+          "align":      {"value": "left"},
+          "baseline":   {"value": "middle"},
+          "fontSize":   {"signal": "datum.IsTotal === 1 ? 13 : 11"},
+          "fontWeight": {"signal": "datum.IsTotal === 1 ? 'bold' : 'normal'"},
+          "fill":       {"value": "#333333"},
+          "limit":      {"signal": "labelWidth - 6"}
+        }
+      }
+    },
+
+    {
+      "type": "text",
+      "from": {"data": "dataset"},
+      "encode": {
+        "enter": {
+          "x":          {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"},
+          "y":          {"signal": "datum.rowY + 2"},
+          "text":       {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"},
+          "align":      {"value": "center"},
+          "baseline":   {"value": "top"},
+          "fontSize":   {"signal": "datum.IsTotal === 1 ? 16 : 13"},
+          "fontWeight": {"value": "bold"},
+          "fill":       {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}
+        }
+      }
+    },
+
+    {
+      "type": "symbol",
+      "from": {"data": "dataset"},
+      "encode": {
+        "enter": {
+          "x":           {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : -999"},
+          "y":           {"signal": "datum.rowY + barOffY + barH + 9"},
+          "shape":       {"value": "triangle-up"},
+          "size":        {"signal": "min(segW * 14, 350)"},
+          "fill":        {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"},
+          "stroke":      {"value": "white"},
+          "strokeWidth": {"value": 1},
+          "opacity":     {"signal": "isValid(datum.Nota) ? 1 : 0"}
+        }
+      }
+    }
+  ]
+}
