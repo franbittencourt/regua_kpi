@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO (rev animação) — igual à versão Deneb, mas com 'width' e dataset fictício embutido (valores em R$ mil) para testar a transição animada em vega.github.io/editor.",
+  "description": "PROTÓTIPO (rev: scroll/nulos/nomes/rótulo) — igual ao Deneb, com width/height e dataset fictício embutido. TI tem muitos projetos (testa scroll) e um sem realização (testa nulo cinza). Testar em vega.github.io/editor.",
   "width": 760,
   "height": 320,
   "autosize": {
@@ -20,8 +20,16 @@
       "update": "width"
     },
     {
+      "name": "containerH",
+      "update": "height"
+    },
+    {
       "name": "labelWidth",
       "value": 185
+    },
+    {
+      "name": "nameW",
+      "update": "min(240, totalWidth * 0.33)"
     },
     {
       "name": "barAreaWidth",
@@ -52,8 +60,36 @@
       "value": 58
     },
     {
+      "name": "bottomPad",
+      "value": 10
+    },
+    {
+      "name": "viewportH",
+      "update": "max(60, containerH - topPad - bottomPad)"
+    },
+    {
+      "name": "nChild",
+      "update": "data('children').length"
+    },
+    {
       "name": "projRowH",
-      "value": 42
+      "update": "nChild > 0 ? clamp(viewportH / nChild, 30, 44) : 42"
+    },
+    {
+      "name": "barHt",
+      "update": "min(26, projRowH - 14)"
+    },
+    {
+      "name": "contentH",
+      "update": "nChild * projRowH"
+    },
+    {
+      "name": "maxScroll",
+      "update": "max(0, contentH - viewportH)"
+    },
+    {
+      "name": "thumbH",
+      "update": "max(24, viewportH * (viewportH / max(contentH, 1)))"
     },
     {
       "name": "chartPad",
@@ -61,11 +97,11 @@
     },
     {
       "name": "chartLeft",
-      "update": "labelWidth + chartPad"
+      "update": "nameW + chartPad"
     },
     {
       "name": "chartRight",
-      "update": "totalWidth - chartPad"
+      "update": "totalWidth - 100"
     },
     {
       "name": "centerX",
@@ -74,10 +110,6 @@
     {
       "name": "divMax",
       "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"
-    },
-    {
-      "name": "nChild",
-      "update": "data('children').length"
     },
     {
       "name": "currentNode",
@@ -90,6 +122,38 @@
         {
           "events": "@backBtn:click",
           "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "scrollY",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "signal": "currentNode"
+          },
+          "update": "0"
+        },
+        {
+          "events": {
+            "signal": "nChild"
+          },
+          "update": "0"
+        },
+        {
+          "events": {
+            "type": "wheel",
+            "consume": true,
+            "filter": [
+              "currentNode !== null"
+            ]
+          },
+          "update": "clamp(scrollY + event.deltaY, 0, maxScroll)"
+        },
+        {
+          "events": "[@scrollThumb:pointerdown, window:pointerup] > window:pointermove",
+          "update": "clamp(scrollY + event.movementY * (contentH / viewportH), 0, maxScroll)"
         }
       ]
     },
@@ -172,7 +236,7 @@
           "Realizado": 814
         },
         {
-          "Nome": "Migração ERP",
+          "Nome": "Migração ERP Corporativo Global",
           "Pai": "TI",
           "Nivel": 3,
           "Ordem": 0,
@@ -210,6 +274,66 @@
           "Nota": 4,
           "Planejado": 120,
           "Realizado": 98
+        },
+        {
+          "Nome": "Portal do Colaborador",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": null,
+          "Nota": null,
+          "Planejado": 220,
+          "Realizado": null
+        },
+        {
+          "Nome": "Segurança / SOC",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": -7.0,
+          "Nota": 3,
+          "Planejado": 160,
+          "Realizado": 171
+        },
+        {
+          "Nome": "Backup & DR",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": 4.0,
+          "Nota": 4,
+          "Planejado": 90,
+          "Realizado": 86
+        },
+        {
+          "Nome": "Licenças SaaS",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": -12.0,
+          "Nota": 2,
+          "Planejado": 140,
+          "Realizado": 157
+        },
+        {
+          "Nome": "Mobile App",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": 9.0,
+          "Nota": 4,
+          "Planejado": 110,
+          "Realizado": 100
+        },
+        {
+          "Nome": "Observabilidade",
+          "Pai": "TI",
+          "Nivel": 3,
+          "Ordem": 0,
+          "Desvio": -22.0,
+          "Nota": 1,
+          "Planejado": 75,
+          "Realizado": 91
         },
         {
           "Nome": "Rebranding",
@@ -365,8 +489,23 @@
         },
         {
           "type": "formula",
+          "as": "plan",
+          "expr": "isValid(datum.Planejado) ? datum.Planejado : 0"
+        },
+        {
+          "type": "formula",
+          "as": "real",
+          "expr": "isValid(datum.Realizado) ? datum.Realizado : 0"
+        },
+        {
+          "type": "formula",
+          "as": "semDado",
+          "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.Realizado))"
+        },
+        {
+          "type": "formula",
           "as": "saldo",
-          "expr": "datum.Planejado - datum.Realizado"
+          "expr": "datum.plan - datum.real"
         },
         {
           "type": "formula",
@@ -388,11 +527,6 @@
           "as": [
             "idx"
           ]
-        },
-        {
-          "type": "formula",
-          "as": "rowY",
-          "expr": "topPad + (datum.idx - 1) * projRowH"
         }
       ]
     },
@@ -846,10 +980,10 @@
             "signal": "centerX"
           },
           "y": {
-            "signal": "topPad - 12"
+            "signal": "topPad"
           },
           "y2": {
-            "signal": "topPad + nChild * projRowH - 12"
+            "signal": "topPad + min(contentH, viewportH)"
           },
           "stroke": {
             "value": "#9aa6b2"
@@ -888,7 +1022,7 @@
             "signal": "centerX - 8"
           },
           "y": {
-            "signal": "topPad - 14"
+            "signal": "topPad - 8"
           },
           "text": {
             "value": "◄ Estouro (gastou mais)"
@@ -924,7 +1058,7 @@
             "signal": "centerX + 8"
           },
           "y": {
-            "signal": "topPad - 14"
+            "signal": "topPad - 8"
           },
           "text": {
             "value": "Economia (gastou menos) ►"
@@ -936,115 +1070,206 @@
       }
     },
     {
-      "type": "rect",
-      "from": {
-        "data": "children"
-      },
+      "type": "group",
+      "name": "drillScroll",
+      "clip": true,
       "encode": {
-        "enter": {
-          "cornerRadius": {
-            "value": 3
-          }
-        },
         "update": {
           "x": {
-            "signal": "centerX + (scale('xDiv', min(datum.saldo, 0)) - centerX) * tEase"
-          },
-          "x2": {
-            "signal": "centerX + (scale('xDiv', max(datum.saldo, 0)) - centerX) * tEase"
+            "value": 0
           },
           "y": {
-            "signal": "datum.rowY + 8"
+            "signal": "topPad"
+          },
+          "width": {
+            "signal": "totalWidth"
           },
           "height": {
-            "value": 26
+            "signal": "viewportH"
+          }
+        }
+      },
+      "marks": [
+        {
+          "type": "rect",
+          "from": {
+            "data": "children"
+          },
+          "encode": {
+            "enter": {
+              "cornerRadius": {
+                "value": 3
+              }
+            },
+            "update": {
+              "x": {
+                "signal": "centerX + (scale('xDiv', min(datum.saldo, 0)) - centerX) * tEase"
+              },
+              "x2": {
+                "signal": "centerX + (scale('xDiv', max(datum.saldo, 0)) - centerX) * tEase"
+              },
+              "y": {
+                "signal": "(datum.idx - 1) * projRowH - scrollY + (projRowH - barHt) / 2"
+              },
+              "height": {
+                "signal": "barHt"
+              },
+              "fill": {
+                "signal": "datum.semDado ? '#c7ccd1' : scale('colorScale', datum.Nota)"
+              },
+              "opacity": {
+                "signal": "tEase"
+              },
+              "tooltip": {
+                "signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '— (sem realização)', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.1f'), '.', ',') + '%' : '—'}"
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {
+            "data": "children"
+          },
+          "encode": {
+            "enter": {
+              "align": {
+                "value": "left"
+              },
+              "baseline": {
+                "value": "middle"
+              },
+              "fill": {
+                "value": "#333333"
+              },
+              "fontSize": {
+                "value": 11
+              }
+            },
+            "update": {
+              "x": {
+                "value": 6
+              },
+              "y": {
+                "signal": "(datum.idx - 1) * projRowH - scrollY + projRowH / 2"
+              },
+              "text": {
+                "field": "Nome"
+              },
+              "limit": {
+                "signal": "nameW - 12"
+              },
+              "opacity": {
+                "signal": "tEase"
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {
+            "data": "children"
+          },
+          "encode": {
+            "enter": {
+              "baseline": {
+                "value": "middle"
+              },
+              "fontSize": {
+                "value": 11
+              },
+              "fontWeight": {
+                "value": "bold"
+              }
+            },
+            "update": {
+              "x": {
+                "signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + ((datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 5 : -5) : (datum.saldo < 0 ? -5 : 5))"
+              },
+              "y": {
+                "signal": "(datum.idx - 1) * projRowH - scrollY + projRowH / 2"
+              },
+              "align": {
+                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 'left' : 'right') : (datum.saldo < 0 ? 'right' : 'left')"
+              },
+              "text": {
+                "signal": "(datum.semDado ? '' : (datum.saldo < 0 ? '−' : '+')) + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'"
+              },
+              "fill": {
+                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? '#ffffff' : (datum.semDado ? '#7a7f85' : scale('colorScale', datum.Nota))"
+              },
+              "opacity": {
+                "signal": "tEase"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "rect",
+      "from": {
+        "data": "navState"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "totalWidth - 6"
+          },
+          "width": {
+            "value": 4
+          },
+          "y": {
+            "signal": "topPad"
+          },
+          "height": {
+            "signal": "viewportH"
           },
           "fill": {
-            "signal": "scale('colorScale', datum.Nota)"
+            "value": "#ececec"
+          },
+          "cornerRadius": {
+            "value": 2
           },
           "opacity": {
-            "signal": "tEase"
-          },
-          "tooltip": {
-            "signal": "{'Item': datum.Nome, 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"
+            "signal": "maxScroll > 0 ? tEase : 0"
           }
         }
       }
     },
     {
-      "type": "text",
+      "type": "rect",
+      "name": "scrollThumb",
       "from": {
-        "data": "children"
+        "data": "navState"
       },
       "encode": {
         "enter": {
-          "align": {
-            "value": "left"
-          },
-          "baseline": {
-            "value": "middle"
-          },
-          "fill": {
-            "value": "#333333"
-          },
-          "fontSize": {
-            "value": 11
+          "cursor": {
+            "value": "pointer"
           }
         },
         "update": {
           "x": {
-            "value": 6
+            "signal": "totalWidth - 6"
+          },
+          "width": {
+            "value": 4
+          },
+          "height": {
+            "signal": "thumbH"
           },
           "y": {
-            "signal": "datum.rowY + 21"
-          },
-          "text": {
-            "field": "Nome"
-          },
-          "limit": {
-            "signal": "labelWidth - 12"
-          },
-          "opacity": {
-            "signal": "tEase"
-          }
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {
-        "data": "children"
-      },
-      "encode": {
-        "enter": {
-          "baseline": {
-            "value": "middle"
-          },
-          "fontSize": {
-            "value": 11
-          },
-          "fontWeight": {
-            "value": "bold"
-          }
-        },
-        "update": {
-          "x": {
-            "signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + (datum.saldo < 0 ? -6 : 6)"
-          },
-          "y": {
-            "signal": "datum.rowY + 21"
-          },
-          "align": {
-            "signal": "datum.saldo < 0 ? 'right' : 'left'"
-          },
-          "text": {
-            "signal": "(datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"
+            "signal": "topPad + (maxScroll > 0 ? (viewportH - thumbH) * (scrollY / maxScroll) : 0)"
           },
           "fill": {
-            "signal": "scale('colorScale', datum.Nota)"
+            "value": "#b0b0b0"
+          },
+          "cornerRadius": {
+            "value": 2
           },
           "opacity": {
-            "signal": "tEase"
+            "signal": "maxScroll > 0 ? tEase : 0"
           }
         }
       }
@@ -1091,6 +1316,7 @@
       "marks": [
         {
           "type": "text",
+          "interactive": false,
           "encode": {
             "enter": {
               "align": {
@@ -1188,7 +1414,7 @@
             "value": 108
           },
           "y": {
-            "value": 30
+            "value": 31
           },
           "text": {
             "value": "Valores em R$ mil"

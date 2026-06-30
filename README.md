@@ -98,6 +98,22 @@ numa área mostra os projetos. A relação de drill é `Pai === Nome` do nó cli
 O `prototype.vg.json` segue com dados fictícios (mesma formatação) para testes em
 vega.github.io/editor.
 
+### Nível 2: rolagem, nomes e nulos
+
+- **Rolagem** quando há muitos projetos: as linhas primeiro se **auto-ajustam**
+  (altura entre 30 e 44px conforme a quantidade); estourando a área visível,
+  entra **scroll** por roda do mouse e uma **barra de rolagem arrastável** à
+  direita. O conteúdo fica recortado (`clip`) na viewport, sem cortar torto.
+- **Mais espaço para o nome** do projeto (coluna ~`min(240, 33% da largura)`).
+- **Rótulo da barra adaptativo:** mostra o valor em R$ e, quando a barra é longa,
+  o rótulo entra **dentro** da barra (texto branco) em vez de transbordar sobre o
+  nome do projeto. O % do projeto fica no tooltip.
+- **Nulos:** projeto sem `Realizado` (ou sem `Planejado`) vira **barra cinza**
+  ("sem realização" no tooltip), sem a cor de severidade enganosa. O saldo trata
+  o nulo como zero (sem `NaN`).
+- **Botão Voltar:** o texto é `interactive: false`, então o clique passa para o
+  botão inteiro (antes, passar sobre o texto não clicava).
+
 ### Transição animada
 
 Na troca de nível há uma transição de ~350ms: as **barras crescem a partir do
