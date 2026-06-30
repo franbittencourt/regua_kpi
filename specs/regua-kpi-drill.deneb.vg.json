@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "v3 — Régua hierárquica + drill divergente com toggle de cenário Atual/Projetado (Deneb/Power BI). Campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado, Projetado, Desvio_Proj, Nota_Proj. Valores em R$ mil. O botão 'Atual | Projetado' troca a régua e o drill entre Realizado e Projetado. pbiContainerWidth/Height injetados pelo Deneb.",
+  "description": "v3 — Régua hierárquica + drill divergente com toggle de cenário Atual/Projetado (Deneb/Power BI). Campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado, Projetado, DesvioProj, NotaProj. Valores em R$ mil. O botão 'Atual | Projetado' troca a régua e o drill entre Realizado e Projetado. pbiContainerWidth/Height injetados pelo Deneb.",
   "autosize": {"type": "none", "resize": true, "contains": "padding"},
   "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
 
@@ -80,8 +80,8 @@
       "transform": [
         {"type": "filter", "expr": "datum.Nivel <= 2 && currentNode === null"},
         {"type": "collect", "sort": {"field": "Ordem"}},
-        {"type": "formula", "as": "notaAtiva", "expr": "cenario === 'proj' ? datum.Nota_Proj : datum.Nota"},
-        {"type": "formula", "as": "desvioAtiva", "expr": "cenario === 'proj' ? datum.Desvio_Proj : datum.Desvio"},
+        {"type": "formula", "as": "notaAtiva", "expr": "cenario === 'proj' ? datum.NotaProj : datum.Nota"},
+        {"type": "formula", "as": "desvioAtiva", "expr": "cenario === 'proj' ? datum.DesvioProj : datum.Desvio"},
         {"type": "formula", "as": "rowY", "expr": "datum.Ordem * rowH + headerH + toolbarH"}
       ]
     },
@@ -301,7 +301,7 @@
           "y": {"signal": "datum.rowY"},
           "height": {"signal": "rowH"},
           "fillOpacity": {"value": 0},
-          "tooltip": {"signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.Desvio_Proj) ? replace(format(datum.Desvio_Proj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.Nota_Proj) ? datum.Nota_Proj : '--'}"}
+          "tooltip": {"signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.DesvioProj) ? replace(format(datum.DesvioProj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.NotaProj) ? datum.NotaProj : '--'}"}
         },
         "hover": {"fillOpacity": {"value": 0.10}}
       }

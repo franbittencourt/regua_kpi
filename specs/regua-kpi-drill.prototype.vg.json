@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO v3 (toggle Atual/Projetado) — igual ao Deneb, com width/height e dataset fictício (inclui Projetado/Desvio_Proj/Nota_Proj). Testar em vega.github.io/editor.",
+  "description": "PROTÓTIPO v3 (toggle Atual/Projetado) — igual ao Deneb, com width/height e dataset fictício (inclui Projetado/DesvioProj/NotaProj). Testar em vega.github.io/editor.",
   "width": 760,
   "height": 380,
   "autosize": {
@@ -247,8 +247,8 @@
           "Planejado": 2160,
           "Realizado": 2420,
           "Projetado": 2300,
-          "Desvio_Proj": 6.5,
-          "Nota_Proj": 3
+          "DesvioProj": 6.5,
+          "NotaProj": 3
         },
         {
           "Nome": "TI",
@@ -260,8 +260,8 @@
           "Planejado": 1000,
           "Realizado": 1183,
           "Projetado": 1080,
-          "Desvio_Proj": 8.0,
-          "Nota_Proj": 3
+          "DesvioProj": 8.0,
+          "NotaProj": 3
         },
         {
           "Nome": "Marketing",
@@ -273,8 +273,8 @@
           "Planejado": 410,
           "Realizado": 423,
           "Projetado": 405,
-          "Desvio_Proj": -1.2,
-          "Nota_Proj": 4
+          "DesvioProj": -1.2,
+          "NotaProj": 4
         },
         {
           "Nome": "Vendas",
@@ -286,8 +286,8 @@
           "Planejado": 750,
           "Realizado": 814,
           "Projetado": 835,
-          "Desvio_Proj": 11.3,
-          "Nota_Proj": 2
+          "DesvioProj": 11.3,
+          "NotaProj": 2
         },
         {
           "Nome": "Migração ERP Corporativo Global",
@@ -484,12 +484,12 @@
         {
           "type": "formula",
           "as": "notaAtiva",
-          "expr": "cenario === 'proj' ? datum.Nota_Proj : datum.Nota"
+          "expr": "cenario === 'proj' ? datum.NotaProj : datum.Nota"
         },
         {
           "type": "formula",
           "as": "desvioAtiva",
-          "expr": "cenario === 'proj' ? datum.Desvio_Proj : datum.Desvio"
+          "expr": "cenario === 'proj' ? datum.DesvioProj : datum.Desvio"
         },
         {
           "type": "formula",
@@ -1284,7 +1284,7 @@
             "value": 0
           },
           "tooltip": {
-            "signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.Desvio_Proj) ? replace(format(datum.Desvio_Proj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.Nota_Proj) ? datum.Nota_Proj : '--'}"
+            "signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.DesvioProj) ? replace(format(datum.DesvioProj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.NotaProj) ? datum.NotaProj : '--'}"
           }
         },
         "hover": {
