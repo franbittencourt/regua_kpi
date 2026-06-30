@@ -283,14 +283,6 @@
       }
     },
     {
-      "type": "text",
-      "from": {"data": "regua"},
-      "encode": {
-        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 14}, "fill": {"value": "#9aa6b2"}},
-        "update": {"x": {"signal": "totalWidth - 12"}, "y": {"signal": "datum.rowY + barOffY + barH / 2"}, "text": {"value": "❯"}, "opacity": {"signal": "tEase"}}
-      }
-    },
-    {
       "type": "rect",
       "name": "areaRow",
       "from": {"data": "regua"},
