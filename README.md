@@ -80,7 +80,19 @@ A régua mostra os nós de `Nivel <= 2`. O drill mostra os filhos
 ordenação são calculados dentro do spec — não precisa medida nova. Convenção:
 gastar mais que o planejado → `saldo` negativo (ofensor, lado esquerdo).
 
-## Fase 3 — pendente
+## Versão Deneb (produção)
 
-Substituir os `values` embutidos do protótipo pela tabela real (roles do Deneb)
-e trocar o signal `width` por `pbiContainerWidth`.
+`specs/regua-kpi-drill.deneb.vg.json` — pronta para colar no Deneb. Diferenças
+em relação ao protótipo:
+
+- lê do `dataset` do Power BI (sem `values` embutidos);
+- usa `pbiContainerWidth` (injetado pelo Deneb) no lugar de `width`;
+- formatação **pt-BR** e valores em **R$ mil** (a tabela `DCAPEX_Drill` divide
+  por 1000), inclusive nos tooltips, com a legenda "Valores em R$ mil" no drill.
+
+Alimenta direto a saída da tabela calculada `DCAPEX_Drill`
+(`Nome`, `Pai`, `Nivel`, `Ordem`, `Desvio`, `Nota`, `Planejado`, `Realizado`).
+O nó raiz (`Nivel = 1`) é o "Total"/empresa; clicar nele mostra as áreas, clicar
+numa área mostra os projetos. A relação de drill é `Pai === Nome` do nó clicado.
+
+O `prototype.vg.json` segue com dados fictícios para testes em vega.github.io/editor.

@@ -1,0 +1,381 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "description": "Régua hierárquica + drill em barras divergentes — versão Deneb (Power BI). Lê do dataset do Power BI (campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado). Valores monetários em R$ mil (a tabela DCAPEX_Drill divide por 1000). pbiContainerWidth é injetado pelo Deneb.",
+  "autosize": {"type": "none", "resize": true, "contains": "padding"},
+  "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
+
+  "signals": [
+    {"name": "totalWidth",   "update": "pbiContainerWidth"},
+    {"name": "labelWidth",   "value": 185},
+    {"name": "barAreaWidth", "update": "totalWidth - labelWidth - 8"},
+    {"name": "segW",         "update": "barAreaWidth / 5"},
+    {"name": "headerH",      "value": 26},
+    {"name": "rowH",         "value": 70},
+    {"name": "barH",         "value": 26},
+    {"name": "barOffY",      "value": 22},
+
+    {"name": "topPad",     "value": 58},
+    {"name": "projRowH",   "value": 42},
+    {"name": "chartPad",   "value": 80},
+    {"name": "chartLeft",  "update": "labelWidth + chartPad"},
+    {"name": "chartRight", "update": "totalWidth - chartPad"},
+    {"name": "centerX",    "update": "(chartLeft + chartRight) / 2"},
+    {"name": "divMax",     "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"},
+    {"name": "nChild",     "update": "data('children').length"},
+
+    {
+      "name": "currentNode",
+      "value": null,
+      "on": [
+        {"events": "@areaRow:click", "update": "datum.Nome"},
+        {"events": "@backBtn:click", "update": "null"}
+      ]
+    }
+  ],
+
+  "data": [
+    {"name": "dataset"},
+
+    {
+      "name": "regua",
+      "source": "dataset",
+      "transform": [
+        {"type": "filter", "expr": "datum.Nivel <= 2 && currentNode === null"},
+        {"type": "collect", "sort": {"field": "Ordem"}},
+        {"type": "formula", "as": "rowY", "expr": "datum.Ordem * rowH + headerH"}
+      ]
+    },
+    {
+      "name": "empresaBand",
+      "source": "regua",
+      "transform": [{"type": "filter", "expr": "datum.Nivel === 1"}]
+    },
+    {
+      "name": "zonas",
+      "source": "regua",
+      "transform": [
+        {"type": "formula", "as": "zoneArr", "expr": "[1, 2, 3, 4, 5]"},
+        {"type": "flatten", "fields": ["zoneArr"], "as": ["notaZona"]}
+      ]
+    },
+    {
+      "name": "zoneMeta",
+      "values": [
+        {"n": 1, "label": "Crítico"},
+        {"n": 2, "label": "Ruim"},
+        {"n": 3, "label": "Atenção"},
+        {"n": 4, "label": "Bom"},
+        {"n": 5, "label": "Ótimo"}
+      ],
+      "transform": [{"type": "filter", "expr": "currentNode === null"}]
+    },
+
+    {
+      "name": "children",
+      "source": "dataset",
+      "transform": [
+        {"type": "filter", "expr": "currentNode !== null && datum.Pai === currentNode"},
+        {"type": "formula", "as": "saldo", "expr": "datum.Planejado - datum.Realizado"},
+        {"type": "formula", "as": "absSaldo", "expr": "abs(datum.saldo)"},
+        {"type": "collect", "sort": {"field": "absSaldo", "order": "descending"}},
+        {"type": "window", "ops": ["row_number"], "as": ["idx"]},
+        {"type": "formula", "as": "rowY", "expr": "topPad + (datum.idx - 1) * projRowH"}
+      ]
+    },
+    {
+      "name": "childExtent",
+      "source": "children",
+      "transform": [{"type": "aggregate", "fields": ["absSaldo"], "ops": ["max"], "as": ["maxAbs"]}]
+    },
+    {
+      "name": "navState",
+      "values": [{}],
+      "transform": [{"type": "filter", "expr": "currentNode !== null"}]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "colorScale",
+      "type": "ordinal",
+      "domain": [1, 2, 3, 4, 5],
+      "range": ["#e15759", "#ED8B00", "#fcad04", "#00b2a9", "#009e47"]
+    },
+    {
+      "name": "xDiv",
+      "type": "linear",
+      "zero": false,
+      "clamp": true,
+      "domain": [{"signal": "-divMax"}, {"signal": "divMax"}],
+      "range": [{"signal": "chartLeft"}, {"signal": "chartRight"}]
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "rect",
+      "from": {"data": "empresaBand"},
+      "encode": {
+        "update": {
+          "x":      {"value": 0},
+          "width":  {"signal": "totalWidth"},
+          "y":      {"signal": "datum.rowY"},
+          "height": {"signal": "rowH"},
+          "fill":   {"value": "#eef3fb"}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "empresaBand"},
+      "encode": {
+        "update": {
+          "x":      {"value": 0},
+          "width":  {"value": 4},
+          "y":      {"signal": "datum.rowY"},
+          "height": {"signal": "rowH"},
+          "fill":   {"value": "#4c78a8"}
+        }
+      }
+    },
+
+    {
+      "type": "text",
+      "from": {"data": "zoneMeta"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 10}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":     {"signal": "labelWidth + (datum.n - 0.5) * segW"},
+          "y":     {"signal": "headerH / 2"},
+          "text":  {"field": "label"},
+          "fill":  {"signal": "scale('colorScale', datum.n)"},
+          "limit": {"signal": "segW - 4"}
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"stroke": {"value": "#e0e0e0"}, "strokeWidth": {"value": 1}},
+        "update": {
+          "x":       {"value": 0},
+          "x2":      {"signal": "totalWidth"},
+          "y":       {"field": "rowY"},
+          "opacity": {"value": 0.8}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "zonas"},
+      "encode": {
+        "enter": {"strokeWidth": {"value": 1.5}, "cornerRadius": {"value": 3}},
+        "update": {
+          "x":           {"signal": "labelWidth + (datum.notaZona - 1) * segW"},
+          "width":       {"signal": "segW - 2"},
+          "y":           {"signal": "datum.rowY + barOffY"},
+          "height":      {"signal": "barH"},
+          "fill":        {"signal": "scale('colorScale', datum.notaZona)"},
+          "fillOpacity": {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
+          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}},
+        "update": {
+          "x":          {"value": 12},
+          "y":          {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text":       {"field": "Nome"},
+          "fontSize":   {"signal": "datum.Nivel === 1 ? 14 : 11"},
+          "fontWeight": {"signal": "datum.Nivel === 1 ? 'bold' : 'normal'"},
+          "limit":      {"signal": "labelWidth - 20"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "top"}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":        {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"},
+          "y":        {"signal": "datum.rowY + 2"},
+          "text":     {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"},
+          "fontSize": {"signal": "datum.Nivel === 1 ? 16 : 13"},
+          "fill":     {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"shape": {"value": "triangle-up"}, "stroke": {"value": "white"}, "strokeWidth": {"value": 1}},
+        "update": {
+          "x":       {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : -999"},
+          "y":       {"signal": "datum.rowY + barOffY + barH + 9"},
+          "size":    {"signal": "min(segW * 14, 350)"},
+          "fill":    {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"},
+          "opacity": {"signal": "isValid(datum.Nota) ? 1 : 0"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 14}, "fill": {"value": "#9aa6b2"}},
+        "update": {
+          "x":    {"signal": "totalWidth - 12"},
+          "y":    {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text": {"value": "❯"}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "areaRow",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}, "fill": {"value": "#4c78a8"}},
+        "update": {
+          "x":           {"value": 0},
+          "width":       {"signal": "totalWidth"},
+          "y":           {"signal": "datum.rowY"},
+          "height":      {"signal": "rowH"},
+          "fillOpacity": {"value": 0},
+          "tooltip":     {"signal": "{'Nó': datum.Nome, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--', 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil'}"}
+        },
+        "hover": {"fillOpacity": {"value": 0.10}}
+      }
+    },
+
+    {
+      "type": "rule",
+      "from": {"data": "navState"},
+      "encode": {
+        "update": {
+          "x":           {"signal": "centerX"},
+          "y":           {"signal": "topPad - 12"},
+          "y2":          {"signal": "topPad + nChild * projRowH - 12"},
+          "stroke":      {"value": "#9aa6b2"},
+          "strokeWidth": {"value": 1.5}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "right"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#c0504d"}},
+        "update": {"x": {"signal": "centerX - 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "◄ Estouro (gastou mais)"}}
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#4e9a51"}},
+        "update": {"x": {"signal": "centerX + 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "Economia (gastou menos) ►"}}
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"cornerRadius": {"value": 3}},
+        "update": {
+          "x":       {"signal": "scale('xDiv', min(datum.saldo, 0))"},
+          "x2":      {"signal": "scale('xDiv', max(datum.saldo, 0))"},
+          "y":       {"signal": "datum.rowY + 8"},
+          "height":  {"value": 26},
+          "fill":    {"signal": "scale('colorScale', datum.Nota)"},
+          "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 11}},
+        "update": {
+          "x":     {"value": 6},
+          "y":     {"signal": "datum.rowY + 21"},
+          "text":  {"field": "Nome"},
+          "limit": {"signal": "labelWidth - 12"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":     {"signal": "datum.saldo < 0 ? scale('xDiv', datum.saldo) - 6 : scale('xDiv', datum.saldo) + 6"},
+          "y":     {"signal": "datum.rowY + 21"},
+          "align": {"signal": "datum.saldo < 0 ? 'right' : 'left'"},
+          "text":  {"signal": "(datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
+          "fill":  {"signal": "scale('colorScale', datum.Nota)"}
+        }
+      }
+    },
+
+    {
+      "type": "group",
+      "name": "backBtn",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}},
+        "update": {
+          "x":            {"value": 0},
+          "y":            {"value": 6},
+          "width":        {"value": 96},
+          "height":       {"value": 26},
+          "fill":         {"value": "#f0f0f0"},
+          "stroke":       {"value": "#cccccc"},
+          "cornerRadius": {"value": 4}
+        }
+      },
+      "marks": [
+        {
+          "type": "text",
+          "encode": {
+            "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fill": {"value": "#444444"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+            "update": {"x": {"value": 48}, "y": {"value": 13}, "text": {"value": "← Voltar"}}
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 13}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":    {"value": 108},
+          "y":    {"value": 15},
+          "text": {"signal": "'Ofensores · ' + currentNode"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#9aa6b2"}, "fontSize": {"value": 10}},
+        "update": {
+          "x":    {"value": 108},
+          "y":    {"value": 30},
+          "text": {"value": "Valores em R$ mil"}
+        }
+      }
+    }
+  ]
+}
