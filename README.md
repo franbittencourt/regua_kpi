@@ -37,47 +37,47 @@ caiu (Nota), com o Desvio em % e um ponteiro (triângulo) na zona vencedora.
 - **Ponteiro com tamanho limitado** (`min(segW*14, 350)`) para não inflar em
   containers largos.
 
-## Fase 2 — Drill para projetos ofensores
+## Fase 2 — Régua hierárquica + drill em barras divergentes
 
 `specs/regua-kpi-drill.prototype.vg.json` — protótipo com dados fictícios
-embutidos. Clique numa linha de área → a régua dá lugar a barras horizontais
-dos projetos daquela área, **ordenados por maior impacto em R$** (o que move o
-desvio). Botão "← Voltar" reseta. Testável em vega.github.io/editor.
+embutidos. Testável em vega.github.io/editor (o clique funciona lá).
 
-Mecânica (Opção A): signal `currentArea` (inicia `null`); clique na linha seta a
-área, "Voltar" volta a `null`. Os dois níveis convivem no mesmo dataset — o
-clique só filtra no cliente, sem nova query.
+**Régua (nível 1):** a **empresa** aparece no topo, destacada (faixa azul +
+fonte maior), e abaixo dela as áreas. **Toda linha é clicável** — a linha
+inteira é um único alvo de clique, com realce no hover.
+
+**Drill (ao clicar):** a régua dá lugar a um **gráfico de barras divergente**
+dos "filhos" do nó clicado:
+- clicar na **empresa** → as **áreas** viram barras;
+- clicar numa **área** → os **projetos** daquela área viram barras.
+
+As barras divergem de um **eixo central**: **estouro (gastou mais) à esquerda**,
+**economia (gastou menos) à direita**, ordenadas do maior ofensor para o menor.
+A cor (Nota 1–5) reforça o sinal. Botão "← Voltar" retorna à régua.
+
+Mecânica (Opção A): signal `currentNode` (inicia `null`); o clique seta o nó,
+"Voltar" volta a `null`. Todos os níveis convivem no mesmo dataset — o clique só
+filtra no cliente, sem nova query. O drill segue a relação `Pai`.
 
 ### Contrato de dados (nomes esperados pelo Deneb)
 
-Tudo numa única tabela "empilhada" alimentando o visual. Campos por nível:
+Uma única tabela "empilhada" (empresa + áreas + projetos), uma linha por nó:
 
-**Nível 1 — régua (uma linha por área):**
+| Campo       | Tipo    | Descrição                                              |
+|-------------|---------|--------------------------------------------------------|
+| `Nome`      | texto   | Rótulo do nó (empresa, área ou projeto)                |
+| `Pai`       | texto   | `Nome` do pai (vazio/nulo na empresa); chave do drill  |
+| `Nivel`     | inteiro | 1 = empresa, 2 = área, 3 = projeto                     |
+| `Ordem`     | inteiro | Ordem vertical na régua (níveis 1–2)                   |
+| `Desvio`    | número  | Desvio % do nó                                          |
+| `Nota`      | 1–5     | Zona vencedora (régua) e cor da barra (drill)          |
+| `Planejado` | número  | Valor planejado/alocado                                |
+| `Realizado` | número  | Valor realizado                                        |
 
-| Campo        | Tipo    | Descrição                                          |
-|--------------|---------|----------------------------------------------------|
-| `Nivel`      | inteiro | **1** para estas linhas                            |
-| `Area`       | texto   | Nome da área (rótulo e chave de drill)             |
-| `OrdemFinal` | inteiro | Ordem vertical (0, 1, 2…)                          |
-| `Desvio`     | número  | Desvio % da área                                   |
-| `Nota`       | 1–5     | Zona vencedora                                     |
-| `IsTotal`    | 0/1     | 1 = linha de total (não dá drill)                  |
-
-**Nível 2 — projetos (uma linha por projeto):**
-
-| Campo        | Tipo    | Descrição                                          |
-|--------------|---------|----------------------------------------------------|
-| `Nivel`      | inteiro | **2** para estas linhas                            |
-| `Area`       | texto   | Área pai (mesmo valor da área do nível 1)          |
-| `Projeto`    | texto   | Nome do projeto (rótulo da barra)                  |
-| `Planejado`  | número  | Valor planejado/alocado                            |
-| `Realizado`  | número  | Valor realizado                                    |
-| `Desvio`     | número  | Desvio % do projeto (rótulo de severidade)         |
-| `Nota`       | 1–5     | Cor da barra                                       |
-
-O impacto em R$ (`Realizado − Planejado`) e a ordenação são calculados dentro do
-spec — não precisa medida nova para isso. Convenção de sinal usada: gastar mais
-que o planejado → `Desvio` negativo (ofensor).
+A régua mostra os nós de `Nivel <= 2`. O drill mostra os filhos
+(`Pai === nó clicado`). O **saldo** (`Planejado − Realizado`), o lado do eixo e a
+ordenação são calculados dentro do spec — não precisa medida nova. Convenção:
+gastar mais que o planejado → `saldo` negativo (ofensor, lado esquerdo).
 
 ## Fase 3 — pendente
 

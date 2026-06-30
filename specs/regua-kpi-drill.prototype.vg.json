@@ -1,28 +1,35 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO Fase 2 — drill da régua para projetos ofensores. Dados fictícios embutidos. Em Deneb: remover os 'values' do dataset e ligar os roles; trocar o signal 'width' por 'pbiContainerWidth'. Testável em vega.github.io/editor (o clique funciona lá).",
+  "description": "PROTÓTIPO Fase 2 (rev) — régua hierárquica com empresa no topo (clicável) e drill em barras divergentes (ofensor à esquerda, economia à direita). Dados fictícios embutidos. Em Deneb: remover os 'values' do dataset e ligar os roles; trocar o signal 'width' por 'pbiContainerWidth'. Testável em vega.github.io/editor (o clique funciona lá).",
   "width": 760,
-  "height": 360,
+  "height": 320,
   "autosize": {"type": "none", "resize": true, "contains": "padding"},
   "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
 
   "signals": [
     {"name": "totalWidth",   "update": "width"},
-    {"name": "labelWidth",   "value": 175},
+    {"name": "labelWidth",   "value": 185},
     {"name": "barAreaWidth", "update": "totalWidth - labelWidth - 8"},
     {"name": "segW",         "update": "barAreaWidth / 5"},
     {"name": "headerH",      "value": 26},
     {"name": "rowH",         "value": 70},
     {"name": "barH",         "value": 26},
     {"name": "barOffY",      "value": 22},
-    {"name": "topPad",       "value": 46},
-    {"name": "projRowH",     "value": 40},
+
+    {"name": "topPad",     "value": 58},
+    {"name": "projRowH",   "value": 42},
+    {"name": "chartPad",   "value": 80},
+    {"name": "chartLeft",  "update": "labelWidth + chartPad"},
+    {"name": "chartRight", "update": "totalWidth - chartPad"},
+    {"name": "centerX",    "update": "(chartLeft + chartRight) / 2"},
+    {"name": "divMax",     "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"},
+    {"name": "nChild",     "update": "data('children').length"},
 
     {
-      "name": "currentArea",
+      "name": "currentNode",
       "value": null,
       "on": [
-        {"events": "@areaRow:click", "update": "datum.IsTotal === 1 ? currentArea : datum.Area"},
+        {"events": "@areaRow:click", "update": "datum.Nome"},
         {"events": "@backBtn:click", "update": "null"}
       ]
     }
@@ -32,38 +39,44 @@
     {
       "name": "dataset",
       "values": [
-        {"Nivel": 1, "Area": "TI",          "OrdemFinal": 0, "Desvio": -8.4, "Nota": 2, "IsTotal": 0},
-        {"Nivel": 1, "Area": "Marketing",   "OrdemFinal": 1, "Desvio":  3.1, "Nota": 4, "IsTotal": 0},
-        {"Nivel": 1, "Area": "Operações",   "OrdemFinal": 2, "Desvio": -2.0, "Nota": 3, "IsTotal": 0},
-        {"Nivel": 1, "Area": "Total",       "OrdemFinal": 3, "Desvio": -3.5, "Nota": 3, "IsTotal": 1},
+        {"Nome": "BBC INC",            "Pai": null,        "Nivel": 1, "Ordem": 0, "Desvio": -12.0,  "Nota": 2, "Planejado": 2160000, "Realizado": 2420000},
 
-        {"Nivel": 2, "Area": "TI",        "Projeto": "Migração ERP",      "Planejado": 500000, "Realizado": 640000, "Desvio": -28.0, "Nota": 1},
-        {"Nivel": 2, "Area": "TI",        "Projeto": "Upgrade Wi-Fi",     "Planejado":  80000, "Realizado":  95000, "Desvio": -18.7, "Nota": 2},
-        {"Nivel": 2, "Area": "TI",        "Projeto": "Data Lake",         "Planejado": 300000, "Realizado": 330000, "Desvio": -10.0, "Nota": 2},
-        {"Nivel": 2, "Area": "TI",        "Projeto": "Helpdesk",          "Planejado": 120000, "Realizado": 118000, "Desvio":   1.7, "Nota": 4},
+        {"Nome": "TI",                 "Pai": "BBC INC",   "Nivel": 2, "Ordem": 1, "Desvio": -18.3,  "Nota": 2, "Planejado": 1000000, "Realizado": 1183000},
+        {"Nome": "Marketing",          "Pai": "BBC INC",   "Nivel": 2, "Ordem": 2, "Desvio": -3.2,   "Nota": 3, "Planejado":  410000, "Realizado":  423000},
+        {"Nome": "Vendas",             "Pai": "BBC INC",   "Nivel": 2, "Ordem": 3, "Desvio": -8.5,   "Nota": 2, "Planejado":  750000, "Realizado":  814000},
 
-        {"Nivel": 2, "Area": "Marketing", "Projeto": "Rebranding",        "Planejado": 150000, "Realizado": 175000, "Desvio": -16.6, "Nota": 2},
-        {"Nivel": 2, "Area": "Marketing", "Projeto": "Campanha Verão",    "Planejado": 200000, "Realizado": 190000, "Desvio":   5.0, "Nota": 4},
-        {"Nivel": 2, "Area": "Marketing", "Projeto": "SEO",               "Planejado":  60000, "Realizado":  58000, "Desvio":   3.3, "Nota": 4},
+        {"Nome": "Migração ERP",       "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -28.0,  "Nota": 1, "Planejado":  500000, "Realizado":  640000},
+        {"Nome": "Upgrade Wi-Fi",      "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -18.7,  "Nota": 2, "Planejado":   80000, "Realizado":   95000},
+        {"Nome": "Data Lake",          "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -10.0,  "Nota": 2, "Planejado":  300000, "Realizado":  330000},
+        {"Nome": "Helpdesk",           "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio":   1.7,  "Nota": 4, "Planejado":  120000, "Realizado":  118000},
 
-        {"Nivel": 2, "Area": "Operações", "Projeto": "Automação Linha 2", "Planejado": 250000, "Realizado": 300000, "Desvio": -20.0, "Nota": 1},
-        {"Nivel": 2, "Area": "Operações", "Projeto": "Logística Sul",     "Planejado": 400000, "Realizado": 415000, "Desvio":  -3.7, "Nota": 3},
-        {"Nivel": 2, "Area": "Operações", "Projeto": "Estoque",           "Planejado": 100000, "Realizado":  99000, "Desvio":   1.0, "Nota": 4}
+        {"Nome": "Rebranding",         "Pai": "Marketing", "Nivel": 3, "Ordem": 0, "Desvio": -16.6,  "Nota": 2, "Planejado":  150000, "Realizado":  175000},
+        {"Nome": "Campanha Verão",     "Pai": "Marketing", "Nivel": 3, "Ordem": 0, "Desvio":   5.0,  "Nota": 4, "Planejado":  200000, "Realizado":  190000},
+        {"Nome": "SEO",                "Pai": "Marketing", "Nivel": 3, "Ordem": 0, "Desvio":   3.3,  "Nota": 4, "Planejado":   60000, "Realizado":   58000},
+
+        {"Nome": "Expansão Nordeste",  "Pai": "Vendas",    "Nivel": 3, "Ordem": 0, "Desvio": -20.0,  "Nota": 1, "Planejado":  250000, "Realizado":  300000},
+        {"Nome": "CRM Novo",           "Pai": "Vendas",    "Nivel": 3, "Ordem": 0, "Desvio":  -3.75, "Nota": 3, "Planejado":  400000, "Realizado":  415000},
+        {"Nome": "Treinamento Equipe", "Pai": "Vendas",    "Nivel": 3, "Ordem": 0, "Desvio":   1.0,  "Nota": 4, "Planejado":  100000, "Realizado":   99000}
       ]
     },
 
     {
-      "name": "nivel1",
+      "name": "regua",
       "source": "dataset",
       "transform": [
-        {"type": "filter", "expr": "datum.Nivel === 1 && currentArea === null"},
-        {"type": "collect", "sort": {"field": "OrdemFinal"}},
-        {"type": "formula", "as": "rowY", "expr": "datum.OrdemFinal * rowH + headerH"}
+        {"type": "filter", "expr": "datum.Nivel <= 2 && currentNode === null"},
+        {"type": "collect", "sort": {"field": "Ordem"}},
+        {"type": "formula", "as": "rowY", "expr": "datum.Ordem * rowH + headerH"}
       ]
+    },
+    {
+      "name": "empresaBand",
+      "source": "regua",
+      "transform": [{"type": "filter", "expr": "datum.Nivel === 1"}]
     },
     {
       "name": "zonas",
-      "source": "nivel1",
+      "source": "regua",
       "transform": [
         {"type": "formula", "as": "zoneArr", "expr": "[1, 2, 3, 4, 5]"},
         {"type": "flatten", "fields": ["zoneArr"], "as": ["notaZona"]}
@@ -78,29 +91,30 @@
         {"n": 4, "label": "Bom"},
         {"n": 5, "label": "Ótimo"}
       ],
-      "transform": [
-        {"type": "filter", "expr": "currentArea === null"}
-      ]
+      "transform": [{"type": "filter", "expr": "currentNode === null"}]
     },
 
     {
-      "name": "nivel2",
+      "name": "children",
       "source": "dataset",
       "transform": [
-        {"type": "filter", "expr": "datum.Nivel === 2 && datum.Area === currentArea"},
-        {"type": "formula", "as": "impacto", "expr": "datum.Realizado - datum.Planejado"},
-        {"type": "formula", "as": "absImpacto", "expr": "abs(datum.impacto)"},
-        {"type": "collect", "sort": {"field": "absImpacto", "order": "descending"}},
+        {"type": "filter", "expr": "currentNode !== null && datum.Pai === currentNode"},
+        {"type": "formula", "as": "saldo", "expr": "datum.Planejado - datum.Realizado"},
+        {"type": "formula", "as": "absSaldo", "expr": "abs(datum.saldo)"},
+        {"type": "collect", "sort": {"field": "saldo", "order": "ascending"}},
         {"type": "window", "ops": ["row_number"], "as": ["idx"]},
-        {"type": "formula", "as": "rowY", "expr": "(datum.idx - 1) * projRowH + topPad"}
+        {"type": "formula", "as": "rowY", "expr": "topPad + (datum.idx - 1) * projRowH"}
       ]
+    },
+    {
+      "name": "childExtent",
+      "source": "children",
+      "transform": [{"type": "aggregate", "fields": ["absSaldo"], "ops": ["max"], "as": ["maxAbs"]}]
     },
     {
       "name": "navState",
       "values": [{}],
-      "transform": [
-        {"type": "filter", "expr": "currentArea !== null"}
-      ]
+      "transform": [{"type": "filter", "expr": "currentNode !== null"}]
     }
   ],
 
@@ -112,26 +126,48 @@
       "range": ["#e15759", "#ED8B00", "#fcad04", "#00b2a9", "#009e47"]
     },
     {
-      "name": "xImpacto",
+      "name": "xDiv",
       "type": "linear",
-      "domain": {"data": "nivel2", "field": "absImpacto"},
-      "domainMin": 0,
-      "range": [0, {"signal": "barAreaWidth - 150"}],
-      "nice": true
+      "zero": false,
+      "clamp": true,
+      "domain": [{"signal": "-divMax"}, {"signal": "divMax"}],
+      "range": [{"signal": "chartLeft"}, {"signal": "chartRight"}]
     }
   ],
 
   "marks": [
     {
+      "type": "rect",
+      "from": {"data": "empresaBand"},
+      "encode": {
+        "update": {
+          "x":      {"value": 0},
+          "width":  {"signal": "totalWidth"},
+          "y":      {"signal": "datum.rowY"},
+          "height": {"signal": "rowH"},
+          "fill":   {"value": "#eef3fb"}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "empresaBand"},
+      "encode": {
+        "update": {
+          "x":      {"value": 0},
+          "width":  {"value": 4},
+          "y":      {"signal": "datum.rowY"},
+          "height": {"signal": "rowH"},
+          "fill":   {"value": "#4c78a8"}
+        }
+      }
+    },
+
+    {
       "type": "text",
       "from": {"data": "zoneMeta"},
       "encode": {
-        "enter": {
-          "align":      {"value": "center"},
-          "baseline":   {"value": "middle"},
-          "fontSize":   {"value": 10},
-          "fontWeight": {"value": "bold"}
-        },
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 10}, "fontWeight": {"value": "bold"}},
         "update": {
           "x":     {"signal": "labelWidth + (datum.n - 0.5) * segW"},
           "y":     {"signal": "headerH / 2"},
@@ -141,35 +177,16 @@
         }
       }
     },
-
-    {
-      "type": "rect",
-      "name": "areaRow",
-      "from": {"data": "nivel1"},
-      "encode": {
-        "enter": {
-          "fill":        {"value": "#000000"},
-          "fillOpacity": {"value": 0.001},
-          "cursor":      {"signal": "datum.IsTotal === 1 ? 'default' : 'pointer'"}
-        },
-        "update": {
-          "x":      {"value": 0},
-          "width":  {"signal": "totalWidth"},
-          "y":      {"signal": "datum.rowY"},
-          "height": {"signal": "rowH"}
-        }
-      }
-    },
     {
       "type": "rule",
-      "from": {"data": "nivel1"},
+      "from": {"data": "regua"},
       "encode": {
         "enter": {"stroke": {"value": "#e0e0e0"}, "strokeWidth": {"value": 1}},
         "update": {
           "x":       {"value": 0},
           "x2":      {"signal": "totalWidth"},
           "y":       {"field": "rowY"},
-          "opacity": {"signal": "datum.IsTotal === 1 ? 0 : 0.8"}
+          "opacity": {"value": 0.8}
         }
       }
     },
@@ -185,43 +202,42 @@
           "height":      {"signal": "barH"},
           "fill":        {"signal": "scale('colorScale', datum.notaZona)"},
           "fillOpacity": {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
-          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"},
-          "tooltip":     {"signal": "{'Área': datum.Area, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--'}"}
+          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"}
         }
       }
     },
     {
       "type": "text",
-      "from": {"data": "nivel1"},
+      "from": {"data": "regua"},
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}},
         "update": {
-          "x":          {"value": 0},
+          "x":          {"value": 12},
           "y":          {"signal": "datum.rowY + barOffY + barH / 2"},
-          "text":       {"field": "Area"},
-          "fontSize":   {"signal": "datum.IsTotal === 1 ? 13 : 11"},
-          "fontWeight": {"signal": "datum.IsTotal === 1 ? 'bold' : 'normal'"},
-          "limit":      {"signal": "labelWidth - 6"}
+          "text":       {"field": "Nome"},
+          "fontSize":   {"signal": "datum.Nivel === 1 ? 14 : 11"},
+          "fontWeight": {"signal": "datum.Nivel === 1 ? 'bold' : 'normal'"},
+          "limit":      {"signal": "labelWidth - 20"}
         }
       }
     },
     {
       "type": "text",
-      "from": {"data": "nivel1"},
+      "from": {"data": "regua"},
       "encode": {
         "enter": {"align": {"value": "center"}, "baseline": {"value": "top"}, "fontWeight": {"value": "bold"}},
         "update": {
           "x":        {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"},
           "y":        {"signal": "datum.rowY + 2"},
           "text":     {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"},
-          "fontSize": {"signal": "datum.IsTotal === 1 ? 16 : 13"},
+          "fontSize": {"signal": "datum.Nivel === 1 ? 16 : 13"},
           "fill":     {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}
         }
       }
     },
     {
       "type": "symbol",
-      "from": {"data": "nivel1"},
+      "from": {"data": "regua"},
       "encode": {
         "enter": {"shape": {"value": "triangle-up"}, "stroke": {"value": "white"}, "strokeWidth": {"value": 1}},
         "update": {
@@ -230,6 +246,107 @@
           "size":    {"signal": "min(segW * 14, 350)"},
           "fill":    {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"},
           "opacity": {"signal": "isValid(datum.Nota) ? 1 : 0"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 14}, "fill": {"value": "#9aa6b2"}},
+        "update": {
+          "x":    {"signal": "totalWidth - 12"},
+          "y":    {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text": {"value": "❯"}
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "areaRow",
+      "from": {"data": "regua"},
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}, "fill": {"value": "#4c78a8"}},
+        "update": {
+          "x":           {"value": 0},
+          "width":       {"signal": "totalWidth"},
+          "y":           {"signal": "datum.rowY"},
+          "height":      {"signal": "rowH"},
+          "fillOpacity": {"value": 0},
+          "tooltip":     {"signal": "{'Nó': datum.Nome, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--', 'Planejado': format(datum.Planejado, '$,.0f'), 'Realizado': format(datum.Realizado, '$,.0f')}"}
+        },
+        "hover": {"fillOpacity": {"value": 0.10}}
+      }
+    },
+
+    {
+      "type": "rule",
+      "from": {"data": "navState"},
+      "encode": {
+        "update": {
+          "x":           {"signal": "centerX"},
+          "y":           {"signal": "topPad - 12"},
+          "y2":          {"signal": "topPad + nChild * projRowH - 12"},
+          "stroke":      {"value": "#9aa6b2"},
+          "strokeWidth": {"value": 1.5}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "right"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#c0504d"}},
+        "update": {"x": {"signal": "centerX - 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "◄ Estouro (gastou mais)"}}
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "navState"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#4e9a51"}},
+        "update": {"x": {"signal": "centerX + 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "Economia (gastou menos) ►"}}
+      }
+    },
+    {
+      "type": "rect",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"cornerRadius": {"value": 3}},
+        "update": {
+          "x":       {"signal": "scale('xDiv', min(datum.saldo, 0))"},
+          "x2":      {"signal": "scale('xDiv', max(datum.saldo, 0))"},
+          "y":       {"signal": "datum.rowY + 8"},
+          "height":  {"value": 26},
+          "fill":    {"signal": "scale('colorScale', datum.Nota)"},
+          "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': format(datum.Planejado, '$,.0f'), 'Realizado': format(datum.Realizado, '$,.0f'), 'Saldo': format(datum.saldo, '+$,.0f'), 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 11}},
+        "update": {
+          "x":     {"value": 6},
+          "y":     {"signal": "datum.rowY + 21"},
+          "text":  {"field": "Nome"},
+          "limit": {"signal": "labelWidth - 12"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "children"},
+      "encode": {
+        "enter": {"baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x":     {"signal": "datum.saldo < 0 ? scale('xDiv', datum.saldo) - 6 : scale('xDiv', datum.saldo) + 6"},
+          "y":     {"signal": "datum.rowY + 21"},
+          "align": {"signal": "datum.saldo < 0 ? 'right' : 'left'"},
+          "text":  {"signal": "(datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + '  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
+          "fill":  {"signal": "scale('colorScale', datum.Nota)"}
         }
       }
     },
@@ -243,8 +360,8 @@
         "update": {
           "x":            {"value": 0},
           "y":            {"value": 6},
-          "width":        {"value": 86},
-          "height":       {"value": 24},
+          "width":        {"value": 96},
+          "height":       {"value": 26},
           "fill":         {"value": "#f0f0f0"},
           "stroke":       {"value": "#cccccc"},
           "cornerRadius": {"value": 4}
@@ -255,7 +372,7 @@
           "type": "text",
           "encode": {
             "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fill": {"value": "#444444"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
-            "update": {"x": {"value": 43}, "y": {"value": 12}, "text": {"value": "← Voltar"}}
+            "update": {"x": {"value": 48}, "y": {"value": 13}, "text": {"value": "← Voltar"}}
           }
         }
       ]
@@ -266,51 +383,9 @@
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 13}, "fontWeight": {"value": "bold"}},
         "update": {
-          "x":    {"value": 98},
-          "y":    {"value": 18},
-          "text": {"signal": "'Projetos ofensores — ' + currentArea"}
-        }
-      }
-    },
-
-    {
-      "type": "rect",
-      "from": {"data": "nivel2"},
-      "encode": {
-        "enter": {"cornerRadius": {"value": 3}},
-        "update": {
-          "x":       {"signal": "labelWidth"},
-          "width":   {"signal": "max(scale('xImpacto', datum.absImpacto), 2)"},
-          "y":       {"signal": "datum.rowY"},
-          "height":  {"value": 24},
-          "fill":    {"signal": "scale('colorScale', datum.Nota)"},
-          "tooltip": {"signal": "{'Projeto': datum.Projeto, 'Planejado': format(datum.Planejado, '$,.0f'), 'Realizado': format(datum.Realizado, '$,.0f'), 'Impacto': format(datum.impacto, '+$,.0f'), 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "nivel2"},
-      "encode": {
-        "enter": {"align": {"value": "right"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 11}},
-        "update": {
-          "x":     {"signal": "labelWidth - 8"},
-          "y":     {"signal": "datum.rowY + 12"},
-          "text":  {"field": "Projeto"},
-          "limit": {"signal": "labelWidth - 12"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "nivel2"},
-      "encode": {
-        "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
-        "update": {
-          "x":    {"signal": "labelWidth + max(scale('xImpacto', datum.absImpacto), 2) + 8"},
-          "y":    {"signal": "datum.rowY + 12"},
-          "text": {"signal": "'R$ ' + replace(format(datum.absImpacto, ',.0f'), /,/g, '.') + '  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
-          "fill": {"signal": "scale('colorScale', datum.Nota)"}
+          "x":    {"value": 108},
+          "y":    {"value": 19},
+          "text": {"signal": "'Ofensores · ' + currentNode"}
         }
       }
     }
