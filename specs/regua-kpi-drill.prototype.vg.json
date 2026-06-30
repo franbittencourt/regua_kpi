@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO v3 (toggle Atual/Projetado) — igual ao Deneb, com width/height e dataset fictício (inclui Projetado/DesvioProj/NotaProj). Testar em vega.github.io/editor.",
+  "description": "PROTÓTIPO v3 (toggle Atual/Projetado; base projetada = PlanejadoAnual) — igual ao Deneb, com width/height e dataset fictício. Testar em vega.github.io/editor.",
   "width": 760,
   "height": 380,
   "autosize": {
@@ -248,7 +248,8 @@
           "Realizado": 2420,
           "Projetado": 2300,
           "DesvioProj": 6.5,
-          "NotaProj": 3
+          "NotaProj": 3,
+          "PlanejadoAnual": 4400
         },
         {
           "Nome": "TI",
@@ -261,7 +262,8 @@
           "Realizado": 1183,
           "Projetado": 1080,
           "DesvioProj": 8.0,
-          "NotaProj": 3
+          "NotaProj": 3,
+          "PlanejadoAnual": 2050
         },
         {
           "Nome": "Marketing",
@@ -274,7 +276,8 @@
           "Realizado": 423,
           "Projetado": 405,
           "DesvioProj": -1.2,
-          "NotaProj": 4
+          "NotaProj": 4,
+          "PlanejadoAnual": 820
         },
         {
           "Nome": "Vendas",
@@ -287,7 +290,8 @@
           "Realizado": 814,
           "Projetado": 835,
           "DesvioProj": 11.3,
-          "NotaProj": 2
+          "NotaProj": 2,
+          "PlanejadoAnual": 1530
         },
         {
           "Nome": "Migração ERP Corporativo Global",
@@ -298,7 +302,8 @@
           "Nota": 1,
           "Planejado": 500,
           "Realizado": 640,
-          "Projetado": 660
+          "Projetado": 660,
+          "PlanejadoAnual": 1000
         },
         {
           "Nome": "Upgrade Wi-Fi",
@@ -309,7 +314,8 @@
           "Nota": 2,
           "Planejado": 80,
           "Realizado": 95,
-          "Projetado": 98
+          "Projetado": 98,
+          "PlanejadoAnual": 165
         },
         {
           "Nome": "Data Lake",
@@ -320,7 +326,8 @@
           "Nota": 2,
           "Planejado": 300,
           "Realizado": 330,
-          "Projetado": 305
+          "Projetado": 305,
+          "PlanejadoAnual": 600
         },
         {
           "Nome": "Helpdesk",
@@ -331,7 +338,8 @@
           "Nota": 4,
           "Planejado": 120,
           "Realizado": 98,
-          "Projetado": 118
+          "Projetado": 118,
+          "PlanejadoAnual": 240
         },
         {
           "Nome": "Portal do Colaborador",
@@ -342,7 +350,8 @@
           "Nota": null,
           "Planejado": 220,
           "Realizado": null,
-          "Projetado": 210
+          "Projetado": 210,
+          "PlanejadoAnual": 440
         },
         {
           "Nome": "Segurança / SOC",
@@ -353,7 +362,8 @@
           "Nota": 3,
           "Planejado": 160,
           "Realizado": 171,
-          "Projetado": 175
+          "Projetado": 175,
+          "PlanejadoAnual": 330
         },
         {
           "Nome": "Backup & DR",
@@ -364,7 +374,8 @@
           "Nota": 4,
           "Planejado": 90,
           "Realizado": 86,
-          "Projetado": 92
+          "Projetado": 92,
+          "PlanejadoAnual": 185
         },
         {
           "Nome": "Licenças SaaS",
@@ -375,7 +386,8 @@
           "Nota": 2,
           "Planejado": 140,
           "Realizado": 157,
-          "Projetado": 150
+          "Projetado": 150,
+          "PlanejadoAnual": 290
         },
         {
           "Nome": "Mobile App",
@@ -386,7 +398,8 @@
           "Nota": 4,
           "Planejado": 110,
           "Realizado": 100,
-          "Projetado": 108
+          "Projetado": 108,
+          "PlanejadoAnual": 225
         },
         {
           "Nome": "Observabilidade",
@@ -397,7 +410,8 @@
           "Nota": 1,
           "Planejado": 75,
           "Realizado": 91,
-          "Projetado": 80
+          "Projetado": 80,
+          "PlanejadoAnual": 150
         },
         {
           "Nome": "Rebranding",
@@ -408,7 +422,8 @@
           "Nota": 2,
           "Planejado": 150,
           "Realizado": 175,
-          "Projetado": 160
+          "Projetado": 160,
+          "PlanejadoAnual": 300
         },
         {
           "Nome": "Campanha Verão",
@@ -419,7 +434,8 @@
           "Nota": 4,
           "Planejado": 200,
           "Realizado": 190,
-          "Projetado": 205
+          "Projetado": 205,
+          "PlanejadoAnual": 410
         },
         {
           "Nome": "SEO",
@@ -430,7 +446,8 @@
           "Nota": 4,
           "Planejado": 60,
           "Realizado": 58,
-          "Projetado": 59
+          "Projetado": 59,
+          "PlanejadoAnual": 120
         },
         {
           "Nome": "Expansão Nordeste",
@@ -441,7 +458,8 @@
           "Nota": 1,
           "Planejado": 250,
           "Realizado": 300,
-          "Projetado": 315
+          "Projetado": 315,
+          "PlanejadoAnual": 520
         },
         {
           "Nome": "CRM Novo",
@@ -452,7 +470,8 @@
           "Nota": 3,
           "Planejado": 400,
           "Realizado": 415,
-          "Projetado": 430
+          "Projetado": 430,
+          "PlanejadoAnual": 820
         },
         {
           "Nome": "Treinamento Equipe",
@@ -463,7 +482,8 @@
           "Nota": 4,
           "Planejado": 100,
           "Realizado": 99,
-          "Projetado": 100
+          "Projetado": 100,
+          "PlanejadoAnual": 205
         }
       ]
     },
@@ -574,8 +594,13 @@
         },
         {
           "type": "formula",
+          "as": "planAtiva",
+          "expr": "cenario === 'proj' ? datum.PlanejadoAnual : datum.Planejado"
+        },
+        {
+          "type": "formula",
           "as": "plan",
-          "expr": "isValid(datum.Planejado) ? datum.Planejado : 0"
+          "expr": "isValid(datum.planAtiva) ? datum.planAtiva : 0"
         },
         {
           "type": "formula",
@@ -585,7 +610,7 @@
         {
           "type": "formula",
           "as": "semDado",
-          "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.execAtiva))"
+          "expr": "(!isValid(datum.planAtiva)) || (!isValid(datum.execAtiva))"
         },
         {
           "type": "formula",
@@ -1446,7 +1471,7 @@
                 "signal": "tEase"
               },
               "tooltip": {
-                "signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"
+                "signal": "{'Item': datum.Nome, 'Planejado (acum.)': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Planejado anual': isValid(datum.PlanejadoAnual) ? 'R$ ' + replace(format(datum.PlanejadoAnual, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Base': cenario === 'proj' ? 'anual − projetado' : 'acum. − realizado', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"
               }
             }
           }

@@ -125,14 +125,20 @@ Uma barra de ferramentas no topo traz o controle **"Atual | Projetado"**. O sign
 visual lê:
 
 - régua: `Nota`/`Desvio` ⟷ `NotaProj`/`DesvioProj` (campo ativo `notaAtiva`/`desvioAtiva`);
-- drill: `Realizado` ⟷ `Projetado` (campo ativo `execAtiva`), que recalcula saldo,
-  cor (vermelho/verde), ordenação e nulos.
+- drill: a **base de comparação também troca** —
+  - Atual: `saldo = Planejado` (acumulado/YTD) `− Realizado`;
+  - Projetado: `saldo = PlanejadoAnual` (plano do ano cheio) `− Projetado`.
+
+  Campos ativos `execAtiva` (execução) e `planAtiva` (base de plano) recalculam
+  saldo, cor (vermelho/verde), ordenação e nulos. O tooltip mostra a base usada.
 
 A troca reaproveita a animação (`tEase`): o ponteiro desliza para a zona projetada
 e as barras se redimensionam. O tooltip da régua mostra os **dois** cenários.
 
-Campos extras no dataset (`DCAPEX_Drill`): `Projetado`, `DesvioProj`, `NotaProj`
-(por nó). Projeto sem `Projetado` cai no tratamento cinza "sem dado" no cenário
+Campos extras no dataset (`DCAPEX_Drill`): `Projetado`, `PlanejadoAnual`,
+`DesvioProj`, `NotaProj` (por nó). No cenário projetado o saldo do drill compara
+`PlanejadoAnual − Projetado` (não o `Planejado` acumulado). Projeto sem
+`Projetado`/`PlanejadoAnual` cai no tratamento cinza "sem dado" no cenário
 projetado; com projeção, volta a ser barra colorida.
 
 ### Transição animada

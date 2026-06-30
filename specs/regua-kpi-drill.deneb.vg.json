@@ -116,9 +116,10 @@
       "transform": [
         {"type": "filter", "expr": "currentNode !== null && datum.Pai === currentNode"},
         {"type": "formula", "as": "execAtiva", "expr": "cenario === 'proj' ? datum.Projetado : datum.Realizado"},
-        {"type": "formula", "as": "plan", "expr": "isValid(datum.Planejado) ? datum.Planejado : 0"},
+        {"type": "formula", "as": "planAtiva", "expr": "cenario === 'proj' ? datum.PlanejadoAnual : datum.Planejado"},
+        {"type": "formula", "as": "plan", "expr": "isValid(datum.planAtiva) ? datum.planAtiva : 0"},
         {"type": "formula", "as": "real", "expr": "isValid(datum.execAtiva) ? datum.execAtiva : 0"},
-        {"type": "formula", "as": "semDado", "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.execAtiva))"},
+        {"type": "formula", "as": "semDado", "expr": "(!isValid(datum.planAtiva)) || (!isValid(datum.execAtiva))"},
         {"type": "formula", "as": "saldo", "expr": "datum.plan - datum.real"},
         {"type": "formula", "as": "absSaldo", "expr": "abs(datum.saldo)"},
         {"type": "collect", "sort": {"field": "absSaldo", "order": "descending"}},
@@ -347,7 +348,7 @@
               "height": {"signal": "barHt"},
               "fill": {"signal": "datum.semDado ? '#c7ccd1' : (datum.saldo < 0 ? '#e15759' : '#009e47')"},
               "opacity": {"signal": "tEase"},
-              "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"}
+              "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado (acum.)': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Planejado anual': isValid(datum.PlanejadoAnual) ? 'R$ ' + replace(format(datum.PlanejadoAnual, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Base': cenario === 'proj' ? 'anual − projetado' : 'acum. − realizado', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"}
             }
           }
         },
