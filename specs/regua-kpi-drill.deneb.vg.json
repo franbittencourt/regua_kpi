@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "Régua hierárquica + drill em barras divergentes — versão Deneb (Power BI). Campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado. Valores em R$ mil (DCAPEX_Drill divide por 1000). Nível 2 com scroll (roda do mouse + barra de rolagem arrastável) e auto-ajuste de altura das linhas. Nulos de Planejado/Realizado em cinza. pbiContainerWidth/pbiContainerHeight injetados pelo Deneb.",
+  "description": "v3 — Régua hierárquica + drill divergente com toggle de cenário Atual/Projetado (Deneb/Power BI). Campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado, Projetado, Desvio_Proj, Nota_Proj. Valores em R$ mil. O botão 'Atual | Projetado' troca a régua e o drill entre Realizado e Projetado. pbiContainerWidth/Height injetados pelo Deneb.",
   "autosize": {"type": "none", "resize": true, "contains": "padding"},
   "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
 
@@ -15,8 +15,9 @@
     {"name": "rowH",         "value": 70},
     {"name": "barH",         "value": 26},
     {"name": "barOffY",      "value": 22},
+    {"name": "toolbarH",     "value": 30},
 
-    {"name": "topPad",     "value": 58},
+    {"name": "topPad",     "update": "toolbarH + 46"},
     {"name": "bottomPad",  "value": 10},
     {"name": "viewportH",  "update": "max(60, containerH - topPad - bottomPad)"},
     {"name": "nChild",     "update": "data('children').length"},
@@ -31,12 +32,24 @@
     {"name": "centerX",    "update": "(chartLeft + chartRight) / 2"},
     {"name": "divMax",     "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"},
 
+    {"name": "segW2",     "value": 76},
+    {"name": "segProjX",  "update": "totalWidth - 8 - segW2"},
+    {"name": "segAtualX", "update": "segProjX - segW2"},
+
     {
       "name": "currentNode",
       "value": null,
       "on": [
         {"events": "@areaRow:click", "update": "datum.Nome"},
         {"events": "@backBtn:click", "update": "null"}
+      ]
+    },
+    {
+      "name": "cenario",
+      "value": "atual",
+      "on": [
+        {"events": "@segAtual:click", "update": "'atual'"},
+        {"events": "@segProj:click", "update": "'proj'"}
       ]
     },
 
@@ -46,13 +59,14 @@
       "on": [
         {"events": {"signal": "currentNode"}, "update": "0"},
         {"events": {"signal": "nChild"}, "update": "0"},
+        {"events": {"signal": "cenario"}, "update": "0"},
         {"events": {"type": "wheel", "consume": true, "filter": ["currentNode !== null"]}, "update": "clamp(scrollY + event.deltaY, 0, maxScroll)"},
         {"events": "[@scrollThumb:pointerdown, window:pointerup] > window:pointermove", "update": "clamp(scrollY + event.movementY * (contentH / viewportH), 0, maxScroll)"}
       ]
     },
 
     {"name": "animMs", "value": 350},
-    {"name": "animStart", "value": 0, "on": [{"events": {"signal": "currentNode"}, "update": "now()"}]},
+    {"name": "animStart", "value": 0, "on": [{"events": {"signal": "currentNode"}, "update": "now()"}, {"events": {"signal": "cenario"}, "update": "now()"}]},
     {"name": "tRaw", "value": 1, "on": [{"events": {"type": "timer", "throttle": 20}, "update": "animStart > 0 ? min((now() - animStart) / animMs, 1) : 1"}]},
     {"name": "tEase", "update": "tRaw * (2 - tRaw)"}
   ],
@@ -66,7 +80,9 @@
       "transform": [
         {"type": "filter", "expr": "datum.Nivel <= 2 && currentNode === null"},
         {"type": "collect", "sort": {"field": "Ordem"}},
-        {"type": "formula", "as": "rowY", "expr": "datum.Ordem * rowH + headerH"}
+        {"type": "formula", "as": "notaAtiva", "expr": "cenario === 'proj' ? datum.Nota_Proj : datum.Nota"},
+        {"type": "formula", "as": "desvioAtiva", "expr": "cenario === 'proj' ? datum.Desvio_Proj : datum.Desvio"},
+        {"type": "formula", "as": "rowY", "expr": "datum.Ordem * rowH + headerH + toolbarH"}
       ]
     },
     {
@@ -99,9 +115,10 @@
       "source": "dataset",
       "transform": [
         {"type": "filter", "expr": "currentNode !== null && datum.Pai === currentNode"},
+        {"type": "formula", "as": "execAtiva", "expr": "cenario === 'proj' ? datum.Projetado : datum.Realizado"},
         {"type": "formula", "as": "plan", "expr": "isValid(datum.Planejado) ? datum.Planejado : 0"},
-        {"type": "formula", "as": "real", "expr": "isValid(datum.Realizado) ? datum.Realizado : 0"},
-        {"type": "formula", "as": "semDado", "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.Realizado))"},
+        {"type": "formula", "as": "real", "expr": "isValid(datum.execAtiva) ? datum.execAtiva : 0"},
+        {"type": "formula", "as": "semDado", "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.execAtiva))"},
         {"type": "formula", "as": "saldo", "expr": "datum.plan - datum.real"},
         {"type": "formula", "as": "absSaldo", "expr": "abs(datum.saldo)"},
         {"type": "collect", "sort": {"field": "absSaldo", "order": "descending"}},
@@ -139,6 +156,51 @@
 
   "marks": [
     {
+      "type": "rule",
+      "encode": {"update": {"x": {"value": 0}, "x2": {"signal": "totalWidth"}, "y": {"signal": "toolbarH"}, "stroke": {"value": "#e6e6e6"}, "strokeWidth": {"value": 1}}}
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {"align": {"value": "right"}, "baseline": {"value": "middle"}, "fontSize": {"value": 10}, "fill": {"value": "#888888"}},
+        "update": {"x": {"signal": "segAtualX - 8"}, "y": {"value": 15}, "text": {"value": "Cenário"}}
+      }
+    },
+    {
+      "type": "rect",
+      "name": "segAtual",
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}, "stroke": {"value": "#c8ced5"}, "strokeWidth": {"value": 1}, "cornerRadiusTopLeft": {"value": 4}, "cornerRadiusBottomLeft": {"value": 4}},
+        "update": {"x": {"signal": "segAtualX"}, "y": {"value": 4}, "width": {"signal": "segW2"}, "height": {"value": 22}, "fill": {"signal": "cenario === 'atual' ? '#4c78a8' : '#eef1f4'"}}
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {"x": {"signal": "segAtualX + segW2 / 2"}, "y": {"value": 15}, "text": {"value": "Atual"}, "fill": {"signal": "cenario === 'atual' ? '#ffffff' : '#555555'"}}
+      }
+    },
+    {
+      "type": "rect",
+      "name": "segProj",
+      "encode": {
+        "enter": {"cursor": {"value": "pointer"}, "stroke": {"value": "#c8ced5"}, "strokeWidth": {"value": 1}, "cornerRadiusTopRight": {"value": 4}, "cornerRadiusBottomRight": {"value": 4}},
+        "update": {"x": {"signal": "segProjX"}, "y": {"value": 4}, "width": {"signal": "segW2"}, "height": {"value": 22}, "fill": {"signal": "cenario === 'proj' ? '#4c78a8' : '#eef1f4'"}}
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {"x": {"signal": "segProjX + segW2 / 2"}, "y": {"value": 15}, "text": {"value": "Projetado"}, "fill": {"signal": "cenario === 'proj' ? '#ffffff' : '#555555'"}}
+      }
+    },
+
+    {
       "type": "rect",
       "from": {"data": "empresaBand"},
       "encode": {"update": {"x": {"value": 0}, "width": {"signal": "totalWidth"}, "y": {"signal": "datum.rowY"}, "height": {"signal": "rowH"}, "fill": {"value": "#eef3fb"}, "opacity": {"signal": "tEase"}}}
@@ -153,7 +215,7 @@
       "from": {"data": "zoneMeta"},
       "encode": {
         "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 10}, "fontWeight": {"value": "bold"}},
-        "update": {"x": {"signal": "labelWidth + (datum.n - 0.5) * segW"}, "y": {"signal": "headerH / 2"}, "text": {"field": "label"}, "fill": {"signal": "scale('colorScale', datum.n)"}, "limit": {"signal": "segW - 4"}, "opacity": {"signal": "tEase"}}
+        "update": {"x": {"signal": "labelWidth + (datum.n - 0.5) * segW"}, "y": {"signal": "toolbarH + headerH / 2"}, "text": {"field": "label"}, "fill": {"signal": "scale('colorScale', datum.n)"}, "limit": {"signal": "segW - 4"}, "opacity": {"signal": "tEase"}}
       }
     },
     {
@@ -175,8 +237,8 @@
           "y": {"signal": "datum.rowY + barOffY"},
           "height": {"signal": "barH"},
           "fill": {"signal": "scale('colorScale', datum.notaZona)"},
-          "fillOpacity": {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
-          "stroke": {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"},
+          "fillOpacity": {"signal": "!isValid(datum.notaAtiva) ? 0.55 : (datum.notaZona === datum.notaAtiva ? 0.95 : 0.28)"},
+          "stroke": {"signal": "datum.notaZona === datum.notaAtiva ? '#ffffff' : null"},
           "opacity": {"signal": "tEase"}
         }
       }
@@ -190,7 +252,7 @@
           "x": {"signal": "labelWidth + (datum.notaZona - 0.5) * segW"},
           "y": {"signal": "datum.rowY + barOffY + barH / 2"},
           "text": {"signal": "'' + datum.notaZona"},
-          "fill": {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : '#3a3a3a'"},
+          "fill": {"signal": "datum.notaZona === datum.notaAtiva ? '#ffffff' : '#3a3a3a'"},
           "opacity": {"signal": "tEase"}
         }
       }
@@ -208,7 +270,7 @@
       "from": {"data": "regua"},
       "encode": {
         "enter": {"align": {"value": "center"}, "baseline": {"value": "top"}, "fontWeight": {"value": "bold"}},
-        "update": {"x": {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"}, "y": {"signal": "datum.rowY + 2"}, "text": {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"}, "fontSize": {"signal": "datum.Nivel === 1 ? 16 : 13"}, "fill": {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}, "opacity": {"signal": "tEase"}}
+        "update": {"x": {"signal": "isValid(datum.notaAtiva) ? labelWidth + (datum.notaAtiva - 0.5) * segW : labelWidth + barAreaWidth / 2"}, "y": {"signal": "datum.rowY + 2"}, "text": {"signal": "isValid(datum.desvioAtiva) ? replace(format(datum.desvioAtiva, '.2f'), '.', ',') + '%' : '--'"}, "fontSize": {"signal": "datum.Nivel === 1 ? 16 : 13"}, "fill": {"signal": "isValid(datum.notaAtiva) ? scale('colorScale', datum.notaAtiva) : '#aaaaaa'"}, "opacity": {"signal": "tEase"}}
       }
     },
     {
@@ -216,7 +278,7 @@
       "from": {"data": "regua"},
       "encode": {
         "enter": {"shape": {"value": "triangle-up"}, "stroke": {"value": "white"}, "strokeWidth": {"value": 1}},
-        "update": {"x": {"signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : -999"}, "y": {"signal": "datum.rowY + barOffY + barH + 9"}, "size": {"signal": "min(segW * 14, 350)"}, "fill": {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"}, "opacity": {"signal": "(isValid(datum.Nota) ? 1 : 0) * tEase"}}
+        "update": {"x": {"signal": "isValid(datum.notaAtiva) ? labelWidth + (datum.notaAtiva - 0.5) * segW : -999"}, "y": {"signal": "datum.rowY + barOffY + barH + 9"}, "size": {"signal": "min(segW * 14, 350)"}, "fill": {"signal": "isValid(datum.notaAtiva) ? scale('colorScale', datum.notaAtiva) : 'transparent'"}, "opacity": {"signal": "(isValid(datum.notaAtiva) ? 1 : 0) * tEase"}}
       }
     },
     {
@@ -239,7 +301,7 @@
           "y": {"signal": "datum.rowY"},
           "height": {"signal": "rowH"},
           "fillOpacity": {"value": 0},
-          "tooltip": {"signal": "{'Nó': datum.Nome, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--', 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil'}"}
+          "tooltip": {"signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.Desvio_Proj) ? replace(format(datum.Desvio_Proj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.Nota_Proj) ? datum.Nota_Proj : '--'}"}
         },
         "hover": {"fillOpacity": {"value": 0.10}}
       }
@@ -285,7 +347,7 @@
               "height": {"signal": "barHt"},
               "fill": {"signal": "datum.semDado ? '#c7ccd1' : (datum.saldo < 0 ? '#e15759' : '#009e47')"},
               "opacity": {"signal": "tEase"},
-              "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '— (sem realização)', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.1f'), '.', ',') + '%' : '—'}"}
+              "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"}
             }
           }
         },
@@ -336,7 +398,7 @@
       "from": {"data": "navState"},
       "encode": {
         "enter": {"cursor": {"value": "pointer"}},
-        "update": {"x": {"value": 0}, "y": {"value": 6}, "width": {"value": 96}, "height": {"value": 26}, "fill": {"value": "#f0f0f0"}, "stroke": {"value": "#cccccc"}, "cornerRadius": {"value": 4}, "opacity": {"signal": "tEase"}}
+        "update": {"x": {"value": 0}, "y": {"signal": "toolbarH + 6"}, "width": {"value": 96}, "height": {"value": 26}, "fill": {"value": "#f0f0f0"}, "stroke": {"value": "#cccccc"}, "cornerRadius": {"value": 4}, "opacity": {"signal": "tEase"}}
       },
       "marks": [
         {
@@ -354,7 +416,7 @@
       "from": {"data": "navState"},
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 13}, "fontWeight": {"value": "bold"}},
-        "update": {"x": {"value": 108}, "y": {"value": 15}, "text": {"signal": "'Ofensores · ' + currentNode"}, "opacity": {"signal": "tEase"}}
+        "update": {"x": {"value": 108}, "y": {"signal": "toolbarH + 15"}, "text": {"signal": "'Ofensores · ' + currentNode + (cenario === 'proj' ? '  (projetado)' : '')"}, "opacity": {"signal": "tEase"}}
       }
     },
     {
@@ -362,7 +424,7 @@
       "from": {"data": "navState"},
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#9aa6b2"}, "fontSize": {"value": 10}},
-        "update": {"x": {"value": 108}, "y": {"value": 31}, "text": {"value": "Valores em R$ mil"}, "opacity": {"signal": "tEase"}}
+        "update": {"x": {"value": 108}, "y": {"signal": "toolbarH + 31"}, "text": {"value": "Valores em R$ mil"}, "opacity": {"signal": "tEase"}}
       }
     }
   ]

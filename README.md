@@ -118,6 +118,23 @@ vega.github.io/editor.
 - **Botão Voltar:** o texto é `interactive: false`, então o clique passa para o
   botão inteiro (antes, passar sobre o texto não clicava).
 
+### Cenário Atual × Projetado (v3)
+
+Uma barra de ferramentas no topo traz o controle **"Atual | Projetado"**. O signal
+`cenario` troca, em régua **e** drill ao mesmo tempo, qual conjunto de campos o
+visual lê:
+
+- régua: `Nota`/`Desvio` ⟷ `Nota_Proj`/`Desvio_Proj` (campo ativo `notaAtiva`/`desvioAtiva`);
+- drill: `Realizado` ⟷ `Projetado` (campo ativo `execAtiva`), que recalcula saldo,
+  cor (vermelho/verde), ordenação e nulos.
+
+A troca reaproveita a animação (`tEase`): o ponteiro desliza para a zona projetada
+e as barras se redimensionam. O tooltip da régua mostra os **dois** cenários.
+
+Campos extras no dataset (`DCAPEX_Drill`): `Projetado`, `Desvio_Proj`, `Nota_Proj`
+(por nó). Projeto sem `Projetado` cai no tratamento cinza "sem dado" no cenário
+projetado; com projeção, volta a ser barra colorida.
+
 ### Transição animada
 
 Na troca de nível há uma transição de ~350ms: as **barras crescem a partir do

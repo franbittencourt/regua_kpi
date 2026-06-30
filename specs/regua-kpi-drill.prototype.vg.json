@@ -1,8 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO (rev: nome maior, cor por lado, nota nas caixinhas) — igual ao Deneb, com width/height e dataset fictício embutido. TI com muitos projetos e um sem realização.",
+  "description": "PROTÓTIPO v3 (toggle Atual/Projetado) — igual ao Deneb, com width/height e dataset fictício (inclui Projetado/Desvio_Proj/Nota_Proj). Testar em vega.github.io/editor.",
   "width": 760,
-  "height": 320,
+  "height": 380,
   "autosize": {
     "type": "none",
     "resize": true,
@@ -56,8 +56,12 @@
       "value": 22
     },
     {
+      "name": "toolbarH",
+      "value": 30
+    },
+    {
       "name": "topPad",
-      "value": 58
+      "update": "toolbarH + 46"
     },
     {
       "name": "bottomPad",
@@ -112,6 +116,18 @@
       "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"
     },
     {
+      "name": "segW2",
+      "value": 76
+    },
+    {
+      "name": "segProjX",
+      "update": "totalWidth - 8 - segW2"
+    },
+    {
+      "name": "segAtualX",
+      "update": "segProjX - segW2"
+    },
+    {
       "name": "currentNode",
       "value": null,
       "on": [
@@ -122,6 +138,20 @@
         {
           "events": "@backBtn:click",
           "update": "null"
+        }
+      ]
+    },
+    {
+      "name": "cenario",
+      "value": "atual",
+      "on": [
+        {
+          "events": "@segAtual:click",
+          "update": "'atual'"
+        },
+        {
+          "events": "@segProj:click",
+          "update": "'proj'"
         }
       ]
     },
@@ -138,6 +168,12 @@
         {
           "events": {
             "signal": "nChild"
+          },
+          "update": "0"
+        },
+        {
+          "events": {
+            "signal": "cenario"
           },
           "update": "0"
         },
@@ -168,6 +204,12 @@
         {
           "events": {
             "signal": "currentNode"
+          },
+          "update": "now()"
+        },
+        {
+          "events": {
+            "signal": "cenario"
           },
           "update": "now()"
         }
@@ -203,7 +245,10 @@
           "Desvio": -12.0,
           "Nota": 2,
           "Planejado": 2160,
-          "Realizado": 2420
+          "Realizado": 2420,
+          "Projetado": 2300,
+          "Desvio_Proj": 6.5,
+          "Nota_Proj": 3
         },
         {
           "Nome": "TI",
@@ -213,7 +258,10 @@
           "Desvio": -18.3,
           "Nota": 2,
           "Planejado": 1000,
-          "Realizado": 1183
+          "Realizado": 1183,
+          "Projetado": 1080,
+          "Desvio_Proj": 8.0,
+          "Nota_Proj": 3
         },
         {
           "Nome": "Marketing",
@@ -223,7 +271,10 @@
           "Desvio": -3.2,
           "Nota": 3,
           "Planejado": 410,
-          "Realizado": 423
+          "Realizado": 423,
+          "Projetado": 405,
+          "Desvio_Proj": -1.2,
+          "Nota_Proj": 4
         },
         {
           "Nome": "Vendas",
@@ -233,7 +284,10 @@
           "Desvio": -8.5,
           "Nota": 2,
           "Planejado": 750,
-          "Realizado": 814
+          "Realizado": 814,
+          "Projetado": 835,
+          "Desvio_Proj": 11.3,
+          "Nota_Proj": 2
         },
         {
           "Nome": "Migração ERP Corporativo Global",
@@ -243,7 +297,8 @@
           "Desvio": -28.0,
           "Nota": 1,
           "Planejado": 500,
-          "Realizado": 640
+          "Realizado": 640,
+          "Projetado": 660
         },
         {
           "Nome": "Upgrade Wi-Fi",
@@ -253,7 +308,8 @@
           "Desvio": -18.7,
           "Nota": 2,
           "Planejado": 80,
-          "Realizado": 95
+          "Realizado": 95,
+          "Projetado": 98
         },
         {
           "Nome": "Data Lake",
@@ -263,7 +319,8 @@
           "Desvio": -10.0,
           "Nota": 2,
           "Planejado": 300,
-          "Realizado": 330
+          "Realizado": 330,
+          "Projetado": 305
         },
         {
           "Nome": "Helpdesk",
@@ -273,7 +330,8 @@
           "Desvio": 18.3,
           "Nota": 4,
           "Planejado": 120,
-          "Realizado": 98
+          "Realizado": 98,
+          "Projetado": 118
         },
         {
           "Nome": "Portal do Colaborador",
@@ -283,7 +341,8 @@
           "Desvio": null,
           "Nota": null,
           "Planejado": 220,
-          "Realizado": null
+          "Realizado": null,
+          "Projetado": 210
         },
         {
           "Nome": "Segurança / SOC",
@@ -293,7 +352,8 @@
           "Desvio": -7.0,
           "Nota": 3,
           "Planejado": 160,
-          "Realizado": 171
+          "Realizado": 171,
+          "Projetado": 175
         },
         {
           "Nome": "Backup & DR",
@@ -303,7 +363,8 @@
           "Desvio": 4.0,
           "Nota": 4,
           "Planejado": 90,
-          "Realizado": 86
+          "Realizado": 86,
+          "Projetado": 92
         },
         {
           "Nome": "Licenças SaaS",
@@ -313,7 +374,8 @@
           "Desvio": -12.0,
           "Nota": 2,
           "Planejado": 140,
-          "Realizado": 157
+          "Realizado": 157,
+          "Projetado": 150
         },
         {
           "Nome": "Mobile App",
@@ -323,7 +385,8 @@
           "Desvio": 9.0,
           "Nota": 4,
           "Planejado": 110,
-          "Realizado": 100
+          "Realizado": 100,
+          "Projetado": 108
         },
         {
           "Nome": "Observabilidade",
@@ -333,7 +396,8 @@
           "Desvio": -22.0,
           "Nota": 1,
           "Planejado": 75,
-          "Realizado": 91
+          "Realizado": 91,
+          "Projetado": 80
         },
         {
           "Nome": "Rebranding",
@@ -343,7 +407,8 @@
           "Desvio": -16.6,
           "Nota": 2,
           "Planejado": 150,
-          "Realizado": 175
+          "Realizado": 175,
+          "Projetado": 160
         },
         {
           "Nome": "Campanha Verão",
@@ -353,7 +418,8 @@
           "Desvio": 5.0,
           "Nota": 4,
           "Planejado": 200,
-          "Realizado": 190
+          "Realizado": 190,
+          "Projetado": 205
         },
         {
           "Nome": "SEO",
@@ -363,7 +429,8 @@
           "Desvio": 3.3,
           "Nota": 4,
           "Planejado": 60,
-          "Realizado": 58
+          "Realizado": 58,
+          "Projetado": 59
         },
         {
           "Nome": "Expansão Nordeste",
@@ -373,7 +440,8 @@
           "Desvio": -20.0,
           "Nota": 1,
           "Planejado": 250,
-          "Realizado": 300
+          "Realizado": 300,
+          "Projetado": 315
         },
         {
           "Nome": "CRM Novo",
@@ -383,7 +451,8 @@
           "Desvio": -3.75,
           "Nota": 3,
           "Planejado": 400,
-          "Realizado": 415
+          "Realizado": 415,
+          "Projetado": 430
         },
         {
           "Nome": "Treinamento Equipe",
@@ -393,7 +462,8 @@
           "Desvio": 1.0,
           "Nota": 4,
           "Planejado": 100,
-          "Realizado": 99
+          "Realizado": 99,
+          "Projetado": 100
         }
       ]
     },
@@ -413,8 +483,18 @@
         },
         {
           "type": "formula",
+          "as": "notaAtiva",
+          "expr": "cenario === 'proj' ? datum.Nota_Proj : datum.Nota"
+        },
+        {
+          "type": "formula",
+          "as": "desvioAtiva",
+          "expr": "cenario === 'proj' ? datum.Desvio_Proj : datum.Desvio"
+        },
+        {
+          "type": "formula",
           "as": "rowY",
-          "expr": "datum.Ordem * rowH + headerH"
+          "expr": "datum.Ordem * rowH + headerH + toolbarH"
         }
       ]
     },
@@ -489,18 +569,23 @@
         },
         {
           "type": "formula",
+          "as": "execAtiva",
+          "expr": "cenario === 'proj' ? datum.Projetado : datum.Realizado"
+        },
+        {
+          "type": "formula",
           "as": "plan",
           "expr": "isValid(datum.Planejado) ? datum.Planejado : 0"
         },
         {
           "type": "formula",
           "as": "real",
-          "expr": "isValid(datum.Realizado) ? datum.Realizado : 0"
+          "expr": "isValid(datum.execAtiva) ? datum.execAtiva : 0"
         },
         {
           "type": "formula",
           "as": "semDado",
-          "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.Realizado))"
+          "expr": "(!isValid(datum.Planejado)) || (!isValid(datum.execAtiva))"
         },
         {
           "type": "formula",
@@ -605,6 +690,207 @@
   ],
   "marks": [
     {
+      "type": "rule",
+      "encode": {
+        "update": {
+          "x": {
+            "value": 0
+          },
+          "x2": {
+            "signal": "totalWidth"
+          },
+          "y": {
+            "signal": "toolbarH"
+          },
+          "stroke": {
+            "value": "#e6e6e6"
+          },
+          "strokeWidth": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "align": {
+            "value": "right"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 10
+          },
+          "fill": {
+            "value": "#888888"
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "segAtualX - 8"
+          },
+          "y": {
+            "value": 15
+          },
+          "text": {
+            "value": "Cenário"
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "segAtual",
+      "encode": {
+        "enter": {
+          "cursor": {
+            "value": "pointer"
+          },
+          "stroke": {
+            "value": "#c8ced5"
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "cornerRadiusTopLeft": {
+            "value": 4
+          },
+          "cornerRadiusBottomLeft": {
+            "value": 4
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "segAtualX"
+          },
+          "y": {
+            "value": 4
+          },
+          "width": {
+            "signal": "segW2"
+          },
+          "height": {
+            "value": 22
+          },
+          "fill": {
+            "signal": "cenario === 'atual' ? '#4c78a8' : '#eef1f4'"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 11
+          },
+          "fontWeight": {
+            "value": "bold"
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "segAtualX + segW2 / 2"
+          },
+          "y": {
+            "value": 15
+          },
+          "text": {
+            "value": "Atual"
+          },
+          "fill": {
+            "signal": "cenario === 'atual' ? '#ffffff' : '#555555'"
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "segProj",
+      "encode": {
+        "enter": {
+          "cursor": {
+            "value": "pointer"
+          },
+          "stroke": {
+            "value": "#c8ced5"
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "cornerRadiusTopRight": {
+            "value": 4
+          },
+          "cornerRadiusBottomRight": {
+            "value": 4
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "segProjX"
+          },
+          "y": {
+            "value": 4
+          },
+          "width": {
+            "signal": "segW2"
+          },
+          "height": {
+            "value": 22
+          },
+          "fill": {
+            "signal": "cenario === 'proj' ? '#4c78a8' : '#eef1f4'"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 11
+          },
+          "fontWeight": {
+            "value": "bold"
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "segProjX + segW2 / 2"
+          },
+          "y": {
+            "value": 15
+          },
+          "text": {
+            "value": "Projetado"
+          },
+          "fill": {
+            "signal": "cenario === 'proj' ? '#ffffff' : '#555555'"
+          }
+        }
+      }
+    },
+    {
       "type": "rect",
       "from": {
         "data": "empresaBand"
@@ -685,7 +971,7 @@
             "signal": "labelWidth + (datum.n - 0.5) * segW"
           },
           "y": {
-            "signal": "headerH / 2"
+            "signal": "toolbarH + headerH / 2"
           },
           "text": {
             "field": "label"
@@ -763,10 +1049,10 @@
             "signal": "scale('colorScale', datum.notaZona)"
           },
           "fillOpacity": {
-            "signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"
+            "signal": "!isValid(datum.notaAtiva) ? 0.55 : (datum.notaZona === datum.notaAtiva ? 0.95 : 0.28)"
           },
           "stroke": {
-            "signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"
+            "signal": "datum.notaZona === datum.notaAtiva ? '#ffffff' : null"
           },
           "opacity": {
             "signal": "tEase"
@@ -805,7 +1091,7 @@
             "signal": "'' + datum.notaZona"
           },
           "fill": {
-            "signal": "datum.notaZona === datum.Nota ? '#ffffff' : '#3a3a3a'"
+            "signal": "datum.notaZona === datum.notaAtiva ? '#ffffff' : '#3a3a3a'"
           },
           "opacity": {
             "signal": "tEase"
@@ -874,19 +1160,19 @@
         },
         "update": {
           "x": {
-            "signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : labelWidth + barAreaWidth / 2"
+            "signal": "isValid(datum.notaAtiva) ? labelWidth + (datum.notaAtiva - 0.5) * segW : labelWidth + barAreaWidth / 2"
           },
           "y": {
             "signal": "datum.rowY + 2"
           },
           "text": {
-            "signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"
+            "signal": "isValid(datum.desvioAtiva) ? replace(format(datum.desvioAtiva, '.2f'), '.', ',') + '%' : '--'"
           },
           "fontSize": {
             "signal": "datum.Nivel === 1 ? 16 : 13"
           },
           "fill": {
-            "signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"
+            "signal": "isValid(datum.notaAtiva) ? scale('colorScale', datum.notaAtiva) : '#aaaaaa'"
           },
           "opacity": {
             "signal": "tEase"
@@ -913,7 +1199,7 @@
         },
         "update": {
           "x": {
-            "signal": "isValid(datum.Nota) ? labelWidth + (datum.Nota - 0.5) * segW : -999"
+            "signal": "isValid(datum.notaAtiva) ? labelWidth + (datum.notaAtiva - 0.5) * segW : -999"
           },
           "y": {
             "signal": "datum.rowY + barOffY + barH + 9"
@@ -922,10 +1208,10 @@
             "signal": "min(segW * 14, 350)"
           },
           "fill": {
-            "signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"
+            "signal": "isValid(datum.notaAtiva) ? scale('colorScale', datum.notaAtiva) : 'transparent'"
           },
           "opacity": {
-            "signal": "(isValid(datum.Nota) ? 1 : 0) * tEase"
+            "signal": "(isValid(datum.notaAtiva) ? 1 : 0) * tEase"
           }
         }
       }
@@ -998,7 +1284,7 @@
             "value": 0
           },
           "tooltip": {
-            "signal": "{'Nó': datum.Nome, 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota': isValid(datum.Nota) ? datum.Nota : '--', 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil'}"
+            "signal": "{'Nó': datum.Nome, 'Desvio atual': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--', 'Nota atual': isValid(datum.Nota) ? datum.Nota : '--', 'Desvio projetado': isValid(datum.Desvio_Proj) ? replace(format(datum.Desvio_Proj, '.2f'), '.', ',') + '%' : '--', 'Nota projetada': isValid(datum.Nota_Proj) ? datum.Nota_Proj : '--'}"
           }
         },
         "hover": {
@@ -1160,7 +1446,7 @@
                 "signal": "tEase"
               },
               "tooltip": {
-                "signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '— (sem realização)', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.1f'), '.', ',') + '%' : '—'}"
+                "signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Projetado': isValid(datum.Projetado) ? 'R$ ' + replace(format(datum.Projetado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'}"
               }
             }
           }
@@ -1330,7 +1616,7 @@
             "value": 0
           },
           "y": {
-            "value": 6
+            "signal": "toolbarH + 6"
           },
           "width": {
             "value": 96
@@ -1417,10 +1703,10 @@
             "value": 108
           },
           "y": {
-            "value": 15
+            "signal": "toolbarH + 15"
           },
           "text": {
-            "signal": "'Ofensores · ' + currentNode"
+            "signal": "'Ofensores · ' + currentNode + (cenario === 'proj' ? '  (projetado)' : '')"
           },
           "opacity": {
             "signal": "tEase"
@@ -1453,7 +1739,7 @@
             "value": 108
           },
           "y": {
-            "value": 31
+            "signal": "toolbarH + 31"
           },
           "text": {
             "value": "Valores em R$ mil"
