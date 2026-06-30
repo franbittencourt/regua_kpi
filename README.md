@@ -95,4 +95,14 @@ Alimenta direto a saída da tabela calculada `DCAPEX_Drill`
 O nó raiz (`Nivel = 1`) é o "Total"/empresa; clicar nele mostra as áreas, clicar
 numa área mostra os projetos. A relação de drill é `Pai === Nome` do nó clicado.
 
-O `prototype.vg.json` segue com dados fictícios para testes em vega.github.io/editor.
+O `prototype.vg.json` segue com dados fictícios (mesma formatação) para testes em
+vega.github.io/editor.
+
+### Transição animada
+
+Na troca de nível há uma transição de ~350ms: as **barras crescem a partir do
+eixo central** (todas partem do desvio zero e se abrem) com fade-in, e a **régua
+dá fade-in** na volta. É feita com `now()` + um `timer` dirigindo o signal `tEase`
+(easing ease-out), sem `transition` declarativo (que o Vega não tem). O timer só
+re-renderiza enquanto `tEase` muda — em repouso (`tEase = 1`) fica ocioso, sem
+custo. Para desligar/ajustar a duração, mexa no signal `animMs` (0 = sem animação).

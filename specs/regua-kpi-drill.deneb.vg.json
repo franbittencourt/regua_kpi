@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "Régua hierárquica + drill em barras divergentes — versão Deneb (Power BI). Lê do dataset do Power BI (campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado). Valores monetários em R$ mil (a tabela DCAPEX_Drill divide por 1000). pbiContainerWidth é injetado pelo Deneb.",
+  "description": "Régua hierárquica + drill em barras divergentes — versão Deneb (Power BI). Lê do dataset do Power BI (campos: Nome, Pai, Nivel, Ordem, Desvio, Nota, Planejado, Realizado). Valores monetários em R$ mil (a tabela DCAPEX_Drill divide por 1000). Transição animada (~350ms): barras crescem do eixo central + fade; régua dá fade-in. pbiContainerWidth é injetado pelo Deneb.",
   "autosize": {"type": "none", "resize": true, "contains": "padding"},
   "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8},
 
@@ -30,7 +30,20 @@
         {"events": "@areaRow:click", "update": "datum.Nome"},
         {"events": "@backBtn:click", "update": "null"}
       ]
-    }
+    },
+
+    {"name": "animMs", "value": 350},
+    {
+      "name": "animStart",
+      "value": 0,
+      "on": [{"events": {"signal": "currentNode"}, "update": "now()"}]
+    },
+    {
+      "name": "tRaw",
+      "value": 1,
+      "on": [{"events": {"type": "timer", "throttle": 20}, "update": "animStart > 0 ? min((now() - animStart) / animMs, 1) : 1"}]
+    },
+    {"name": "tEase", "update": "tRaw * (2 - tRaw)"}
   ],
 
   "data": [
@@ -117,11 +130,12 @@
       "from": {"data": "empresaBand"},
       "encode": {
         "update": {
-          "x":      {"value": 0},
-          "width":  {"signal": "totalWidth"},
-          "y":      {"signal": "datum.rowY"},
-          "height": {"signal": "rowH"},
-          "fill":   {"value": "#eef3fb"}
+          "x":       {"value": 0},
+          "width":   {"signal": "totalWidth"},
+          "y":       {"signal": "datum.rowY"},
+          "height":  {"signal": "rowH"},
+          "fill":    {"value": "#eef3fb"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -130,11 +144,12 @@
       "from": {"data": "empresaBand"},
       "encode": {
         "update": {
-          "x":      {"value": 0},
-          "width":  {"value": 4},
-          "y":      {"signal": "datum.rowY"},
-          "height": {"signal": "rowH"},
-          "fill":   {"value": "#4c78a8"}
+          "x":       {"value": 0},
+          "width":   {"value": 4},
+          "y":       {"signal": "datum.rowY"},
+          "height":  {"signal": "rowH"},
+          "fill":    {"value": "#4c78a8"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -145,11 +160,12 @@
       "encode": {
         "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 10}, "fontWeight": {"value": "bold"}},
         "update": {
-          "x":     {"signal": "labelWidth + (datum.n - 0.5) * segW"},
-          "y":     {"signal": "headerH / 2"},
-          "text":  {"field": "label"},
-          "fill":  {"signal": "scale('colorScale', datum.n)"},
-          "limit": {"signal": "segW - 4"}
+          "x":       {"signal": "labelWidth + (datum.n - 0.5) * segW"},
+          "y":       {"signal": "headerH / 2"},
+          "text":    {"field": "label"},
+          "fill":    {"signal": "scale('colorScale', datum.n)"},
+          "limit":   {"signal": "segW - 4"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -162,7 +178,7 @@
           "x":       {"value": 0},
           "x2":      {"signal": "totalWidth"},
           "y":       {"field": "rowY"},
-          "opacity": {"value": 0.8}
+          "opacity": {"signal": "0.8 * tEase"}
         }
       }
     },
@@ -178,7 +194,8 @@
           "height":      {"signal": "barH"},
           "fill":        {"signal": "scale('colorScale', datum.notaZona)"},
           "fillOpacity": {"signal": "!isValid(datum.Nota) ? 0.55 : (datum.notaZona === datum.Nota ? 0.95 : 0.28)"},
-          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"}
+          "stroke":      {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : null"},
+          "opacity":     {"signal": "tEase"}
         }
       }
     },
@@ -193,7 +210,8 @@
           "text":       {"field": "Nome"},
           "fontSize":   {"signal": "datum.Nivel === 1 ? 14 : 11"},
           "fontWeight": {"signal": "datum.Nivel === 1 ? 'bold' : 'normal'"},
-          "limit":      {"signal": "labelWidth - 20"}
+          "limit":      {"signal": "labelWidth - 20"},
+          "opacity":    {"signal": "tEase"}
         }
       }
     },
@@ -207,7 +225,8 @@
           "y":        {"signal": "datum.rowY + 2"},
           "text":     {"signal": "isValid(datum.Desvio) ? replace(format(datum.Desvio, '.2f'), '.', ',') + '%' : '--'"},
           "fontSize": {"signal": "datum.Nivel === 1 ? 16 : 13"},
-          "fill":     {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"}
+          "fill":     {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : '#aaaaaa'"},
+          "opacity":  {"signal": "tEase"}
         }
       }
     },
@@ -221,7 +240,7 @@
           "y":       {"signal": "datum.rowY + barOffY + barH + 9"},
           "size":    {"signal": "min(segW * 14, 350)"},
           "fill":    {"signal": "isValid(datum.Nota) ? scale('colorScale', datum.Nota) : 'transparent'"},
-          "opacity": {"signal": "isValid(datum.Nota) ? 1 : 0"}
+          "opacity": {"signal": "(isValid(datum.Nota) ? 1 : 0) * tEase"}
         }
       }
     },
@@ -231,9 +250,10 @@
       "encode": {
         "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 14}, "fill": {"value": "#9aa6b2"}},
         "update": {
-          "x":    {"signal": "totalWidth - 12"},
-          "y":    {"signal": "datum.rowY + barOffY + barH / 2"},
-          "text": {"value": "❯"}
+          "x":       {"signal": "totalWidth - 12"},
+          "y":       {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text":    {"value": "❯"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -264,7 +284,8 @@
           "y":           {"signal": "topPad - 12"},
           "y2":          {"signal": "topPad + nChild * projRowH - 12"},
           "stroke":      {"value": "#9aa6b2"},
-          "strokeWidth": {"value": 1.5}
+          "strokeWidth": {"value": 1.5},
+          "opacity":     {"signal": "tEase"}
         }
       }
     },
@@ -273,7 +294,7 @@
       "from": {"data": "navState"},
       "encode": {
         "enter": {"align": {"value": "right"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#c0504d"}},
-        "update": {"x": {"signal": "centerX - 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "◄ Estouro (gastou mais)"}}
+        "update": {"x": {"signal": "centerX - 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "◄ Estouro (gastou mais)"}, "opacity": {"signal": "tEase"}}
       }
     },
     {
@@ -281,7 +302,7 @@
       "from": {"data": "navState"},
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "bottom"}, "fontSize": {"value": 10}, "fill": {"value": "#4e9a51"}},
-        "update": {"x": {"signal": "centerX + 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "Economia (gastou menos) ►"}}
+        "update": {"x": {"signal": "centerX + 8"}, "y": {"signal": "topPad - 14"}, "text": {"value": "Economia (gastou menos) ►"}, "opacity": {"signal": "tEase"}}
       }
     },
     {
@@ -290,11 +311,12 @@
       "encode": {
         "enter": {"cornerRadius": {"value": 3}},
         "update": {
-          "x":       {"signal": "scale('xDiv', min(datum.saldo, 0))"},
-          "x2":      {"signal": "scale('xDiv', max(datum.saldo, 0))"},
+          "x":       {"signal": "centerX + (scale('xDiv', min(datum.saldo, 0)) - centerX) * tEase"},
+          "x2":      {"signal": "centerX + (scale('xDiv', max(datum.saldo, 0)) - centerX) * tEase"},
           "y":       {"signal": "datum.rowY + 8"},
           "height":  {"value": 26},
           "fill":    {"signal": "scale('colorScale', datum.Nota)"},
+          "opacity": {"signal": "tEase"},
           "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil', 'Realizado': 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': replace(format(datum.Desvio, '.1f'), '.', ',') + '%'}"}
         }
       }
@@ -305,10 +327,11 @@
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 11}},
         "update": {
-          "x":     {"value": 6},
-          "y":     {"signal": "datum.rowY + 21"},
-          "text":  {"field": "Nome"},
-          "limit": {"signal": "labelWidth - 12"}
+          "x":       {"value": 6},
+          "y":       {"signal": "datum.rowY + 21"},
+          "text":    {"field": "Nome"},
+          "limit":   {"signal": "labelWidth - 12"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -318,11 +341,12 @@
       "encode": {
         "enter": {"baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
         "update": {
-          "x":     {"signal": "datum.saldo < 0 ? scale('xDiv', datum.saldo) - 6 : scale('xDiv', datum.saldo) + 6"},
-          "y":     {"signal": "datum.rowY + 21"},
-          "align": {"signal": "datum.saldo < 0 ? 'right' : 'left'"},
-          "text":  {"signal": "(datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
-          "fill":  {"signal": "scale('colorScale', datum.Nota)"}
+          "x":       {"signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + (datum.saldo < 0 ? -6 : 6)"},
+          "y":       {"signal": "datum.rowY + 21"},
+          "align":   {"signal": "datum.saldo < 0 ? 'right' : 'left'"},
+          "text":    {"signal": "(datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil  (' + replace(format(datum.Desvio, '.1f'), '.', ',') + '%)'"},
+          "fill":    {"signal": "scale('colorScale', datum.Nota)"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -340,7 +364,8 @@
           "height":       {"value": 26},
           "fill":         {"value": "#f0f0f0"},
           "stroke":       {"value": "#cccccc"},
-          "cornerRadius": {"value": 4}
+          "cornerRadius": {"value": 4},
+          "opacity":      {"signal": "tEase"}
         }
       },
       "marks": [
@@ -359,9 +384,10 @@
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}, "fontSize": {"value": 13}, "fontWeight": {"value": "bold"}},
         "update": {
-          "x":    {"value": 108},
-          "y":    {"value": 15},
-          "text": {"signal": "'Ofensores · ' + currentNode"}
+          "x":       {"value": 108},
+          "y":       {"value": 15},
+          "text":    {"signal": "'Ofensores · ' + currentNode"},
+          "opacity": {"signal": "tEase"}
         }
       }
     },
@@ -371,9 +397,10 @@
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#9aa6b2"}, "fontSize": {"value": 10}},
         "update": {
-          "x":    {"value": 108},
-          "y":    {"value": 30},
-          "text": {"value": "Valores em R$ mil"}
+          "x":       {"value": 108},
+          "y":       {"value": 30},
+          "text":    {"value": "Valores em R$ mil"},
+          "opacity": {"signal": "tEase"}
         }
       }
     }
