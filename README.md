@@ -52,8 +52,9 @@ dos "filhos" do nó clicado:
 - clicar numa **área** → os **projetos** daquela área viram barras.
 
 As barras divergem de um **eixo central**: **estouro (gastou mais) à esquerda**,
-**economia (gastou menos) à direita**, ordenadas do maior ofensor para o menor.
-A cor (Nota 1–5) reforça o sinal. Botão "← Voltar" retorna à régua.
+**economia (gastou menos) à direita**, ordenadas pelo **desvio absoluto** (maior
+magnitude no topo, independente do lado). A cor (Nota 1–5) reforça o sinal.
+Botão "← Voltar" retorna à régua.
 
 Mecânica (Opção A): signal `currentNode` (inicia `null`); o clique seta o nó,
 "Voltar" volta a `null`. Todos os níveis convivem no mesmo dataset — o clique só

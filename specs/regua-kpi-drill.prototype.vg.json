@@ -48,7 +48,7 @@
         {"Nome": "Migração ERP",       "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -28.0,  "Nota": 1, "Planejado":  500000, "Realizado":  640000},
         {"Nome": "Upgrade Wi-Fi",      "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -18.7,  "Nota": 2, "Planejado":   80000, "Realizado":   95000},
         {"Nome": "Data Lake",          "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio": -10.0,  "Nota": 2, "Planejado":  300000, "Realizado":  330000},
-        {"Nome": "Helpdesk",           "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio":   1.7,  "Nota": 4, "Planejado":  120000, "Realizado":  118000},
+        {"Nome": "Helpdesk",           "Pai": "TI",        "Nivel": 3, "Ordem": 0, "Desvio":  18.3,  "Nota": 4, "Planejado":  120000, "Realizado":   98000},
 
         {"Nome": "Rebranding",         "Pai": "Marketing", "Nivel": 3, "Ordem": 0, "Desvio": -16.6,  "Nota": 2, "Planejado":  150000, "Realizado":  175000},
         {"Nome": "Campanha Verão",     "Pai": "Marketing", "Nivel": 3, "Ordem": 0, "Desvio":   5.0,  "Nota": 4, "Planejado":  200000, "Realizado":  190000},
@@ -101,7 +101,7 @@
         {"type": "filter", "expr": "currentNode !== null && datum.Pai === currentNode"},
         {"type": "formula", "as": "saldo", "expr": "datum.Planejado - datum.Realizado"},
         {"type": "formula", "as": "absSaldo", "expr": "abs(datum.saldo)"},
-        {"type": "collect", "sort": {"field": "saldo", "order": "ascending"}},
+        {"type": "collect", "sort": {"field": "absSaldo", "order": "descending"}},
         {"type": "window", "ops": ["row_number"], "as": ["idx"]},
         {"type": "formula", "as": "rowY", "expr": "topPad + (datum.idx - 1) * projRowH"}
       ]
