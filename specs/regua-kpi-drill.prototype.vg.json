@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "PROTÓTIPO (rev: scroll/nulos/nomes/rótulo) — igual ao Deneb, com width/height e dataset fictício embutido. TI tem muitos projetos (testa scroll) e um sem realização (testa nulo cinza). Testar em vega.github.io/editor.",
+  "description": "PROTÓTIPO (rev: nome maior, cor por lado, nota nas caixinhas) — igual ao Deneb, com width/height e dataset fictício embutido. TI com muitos projetos e um sem realização.",
   "width": 760,
   "height": 320,
   "autosize": {
@@ -29,7 +29,7 @@
     },
     {
       "name": "nameW",
-      "update": "min(240, totalWidth * 0.33)"
+      "update": "min(340, totalWidth * 0.45)"
     },
     {
       "name": "barAreaWidth",
@@ -93,7 +93,7 @@
     },
     {
       "name": "chartPad",
-      "value": 80
+      "value": 12
     },
     {
       "name": "chartLeft",
@@ -101,7 +101,7 @@
     },
     {
       "name": "chartRight",
-      "update": "totalWidth - 100"
+      "update": "totalWidth - 16"
     },
     {
       "name": "centerX",
@@ -777,6 +777,45 @@
     {
       "type": "text",
       "from": {
+        "data": "zonas"
+      },
+      "encode": {
+        "enter": {
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 11
+          },
+          "fontWeight": {
+            "value": "bold"
+          }
+        },
+        "update": {
+          "x": {
+            "signal": "labelWidth + (datum.notaZona - 0.5) * segW"
+          },
+          "y": {
+            "signal": "datum.rowY + barOffY + barH / 2"
+          },
+          "text": {
+            "signal": "'' + datum.notaZona"
+          },
+          "fill": {
+            "signal": "datum.notaZona === datum.Nota ? '#ffffff' : '#3a3a3a'"
+          },
+          "opacity": {
+            "signal": "tEase"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
         "data": "regua"
       },
       "encode": {
@@ -1115,7 +1154,7 @@
                 "signal": "barHt"
               },
               "fill": {
-                "signal": "datum.semDado ? '#c7ccd1' : scale('colorScale', datum.Nota)"
+                "signal": "datum.semDado ? '#c7ccd1' : (datum.saldo < 0 ? '#e15759' : '#009e47')"
               },
               "opacity": {
                 "signal": "tEase"
@@ -1184,19 +1223,19 @@
             },
             "update": {
               "x": {
-                "signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + ((datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 5 : -5) : (datum.saldo < 0 ? -5 : 5))"
+                "signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + ((datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? (datum.saldo < 0 ? 5 : -5) : (datum.saldo < 0 ? -5 : 5))"
               },
               "y": {
                 "signal": "(datum.idx - 1) * projRowH - scrollY + projRowH / 2"
               },
               "align": {
-                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 'left' : 'right') : (datum.saldo < 0 ? 'right' : 'left')"
+                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? (datum.saldo < 0 ? 'left' : 'right') : (datum.saldo < 0 ? 'right' : 'left')"
               },
               "text": {
                 "signal": "(datum.semDado ? '' : (datum.saldo < 0 ? '−' : '+')) + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'"
               },
               "fill": {
-                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? '#ffffff' : (datum.semDado ? '#7a7f85' : scale('colorScale', datum.Nota))"
+                "signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? '#ffffff' : (datum.semDado ? '#7a7f85' : (datum.saldo < 0 ? '#e15759' : '#009e47'))"
               },
               "opacity": {
                 "signal": "tEase"

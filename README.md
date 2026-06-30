@@ -30,7 +30,8 @@ caiu (Nota), com o Desvio em % e um ponteiro (triângulo) na zona vencedora.
 - **Zona vencedora destacada.** Zonas não-selecionadas ficam esmaecidas
   (opacity 0.28); a zona da `Nota` fica em destaque (opacity 0.95 + borda branca).
 - **Cabeçalho de escala único** (`Crítico · Ruim · Atenção · Bom · Ótimo`) no
-  topo, no lugar dos números 1–5 repetidos sob cada linha.
+  topo, e o **número da nota (1–5) dentro de cada caixinha** em cada linha
+  (branco na zona vencedora, cinza-escuro nas demais).
 - **Valor do Desvio alinhado à zona vencedora**, em coluna com o ponteiro.
 - **Tooltip** por linha (Área, Desvio, Nota).
 - **Formatação pt-BR** do Desvio (vírgula decimal via `replace`).
@@ -104,7 +105,10 @@ vega.github.io/editor.
   (altura entre 30 e 44px conforme a quantidade); estourando a área visível,
   entra **scroll** por roda do mouse e uma **barra de rolagem arrastável** à
   direita. O conteúdo fica recortado (`clip`) na viewport, sem cortar torto.
-- **Mais espaço para o nome** do projeto (coluna ~`min(240, 33% da largura)`).
+- **Mais espaço para o nome** do projeto (coluna ~`min(340, 45% da largura)`).
+- **Cor das barras por lado:** gastou mais que o planejado (saldo < 0) = vermelho;
+  gastou menos = verde; sem dado = cinza. (A cor por Nota 1–5 segue só na régua.)
+  A ordenação continua por desvio absoluto.
 - **Rótulo da barra adaptativo:** mostra o valor em R$ e, quando a barra é longa,
   o rótulo entra **dentro** da barra (texto branco) em vez de transbordar sobre o
   nome do projeto. O % do projeto fica no tooltip.

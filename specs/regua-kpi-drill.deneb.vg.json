@@ -8,7 +8,7 @@
     {"name": "totalWidth",   "update": "pbiContainerWidth"},
     {"name": "containerH",   "update": "pbiContainerHeight"},
     {"name": "labelWidth",   "value": 185},
-    {"name": "nameW",        "update": "min(240, totalWidth * 0.33)"},
+    {"name": "nameW",        "update": "min(340, totalWidth * 0.45)"},
     {"name": "barAreaWidth", "update": "totalWidth - labelWidth - 8"},
     {"name": "segW",         "update": "barAreaWidth / 5"},
     {"name": "headerH",      "value": 26},
@@ -25,9 +25,9 @@
     {"name": "contentH",   "update": "nChild * projRowH"},
     {"name": "maxScroll",  "update": "max(0, contentH - viewportH)"},
     {"name": "thumbH",     "update": "max(24, viewportH * (viewportH / max(contentH, 1)))"},
-    {"name": "chartPad",   "value": 80},
+    {"name": "chartPad",   "value": 12},
     {"name": "chartLeft",  "update": "nameW + chartPad"},
-    {"name": "chartRight", "update": "totalWidth - 100"},
+    {"name": "chartRight", "update": "totalWidth - 16"},
     {"name": "centerX",    "update": "(chartLeft + chartRight) / 2"},
     {"name": "divMax",     "update": "data('childExtent').length ? data('childExtent')[0].maxAbs : 1"},
 
@@ -183,6 +183,20 @@
     },
     {
       "type": "text",
+      "from": {"data": "zonas"},
+      "encode": {
+        "enter": {"align": {"value": "center"}, "baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
+        "update": {
+          "x": {"signal": "labelWidth + (datum.notaZona - 0.5) * segW"},
+          "y": {"signal": "datum.rowY + barOffY + barH / 2"},
+          "text": {"signal": "'' + datum.notaZona"},
+          "fill": {"signal": "datum.notaZona === datum.Nota ? '#ffffff' : '#3a3a3a'"},
+          "opacity": {"signal": "tEase"}
+        }
+      }
+    },
+    {
+      "type": "text",
       "from": {"data": "regua"},
       "encode": {
         "enter": {"align": {"value": "left"}, "baseline": {"value": "middle"}, "fill": {"value": "#333333"}},
@@ -269,7 +283,7 @@
               "x2": {"signal": "centerX + (scale('xDiv', max(datum.saldo, 0)) - centerX) * tEase"},
               "y": {"signal": "(datum.idx - 1) * projRowH - scrollY + (projRowH - barHt) / 2"},
               "height": {"signal": "barHt"},
-              "fill": {"signal": "datum.semDado ? '#c7ccd1' : scale('colorScale', datum.Nota)"},
+              "fill": {"signal": "datum.semDado ? '#c7ccd1' : (datum.saldo < 0 ? '#e15759' : '#009e47')"},
               "opacity": {"signal": "tEase"},
               "tooltip": {"signal": "{'Item': datum.Nome, 'Planejado': isValid(datum.Planejado) ? 'R$ ' + replace(format(datum.Planejado, ',.0f'), /,/g, '.') + ' mil' : '—', 'Realizado': isValid(datum.Realizado) ? 'R$ ' + replace(format(datum.Realizado, ',.0f'), /,/g, '.') + ' mil' : '— (sem realização)', 'Saldo': (datum.saldo < 0 ? '−' : '+') + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil', 'Desvio': isValid(datum.Desvio) ? replace(format(datum.Desvio, '.1f'), '.', ',') + '%' : '—'}"}
             }
@@ -289,11 +303,11 @@
           "encode": {
             "enter": {"baseline": {"value": "middle"}, "fontSize": {"value": 11}, "fontWeight": {"value": "bold"}},
             "update": {
-              "x": {"signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + ((datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 5 : -5) : (datum.saldo < 0 ? -5 : 5))"},
+              "x": {"signal": "(centerX + (scale('xDiv', datum.saldo) - centerX) * tEase) + ((datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? (datum.saldo < 0 ? 5 : -5) : (datum.saldo < 0 ? -5 : 5))"},
               "y": {"signal": "(datum.idx - 1) * projRowH - scrollY + projRowH / 2"},
-              "align": {"signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? (datum.saldo < 0 ? 'left' : 'right') : (datum.saldo < 0 ? 'right' : 'left')"},
+              "align": {"signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? (datum.saldo < 0 ? 'left' : 'right') : (datum.saldo < 0 ? 'right' : 'left')"},
               "text": {"signal": "(datum.semDado ? '' : (datum.saldo < 0 ? '−' : '+')) + 'R$ ' + replace(format(datum.absSaldo, ',.0f'), /,/g, '.') + ' mil'"},
-              "fill": {"signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 84) : ((totalWidth - scale('xDiv', datum.saldo)) < 84)) ? '#ffffff' : (datum.semDado ? '#7a7f85' : scale('colorScale', datum.Nota))"},
+              "fill": {"signal": "(datum.saldo < 0 ? ((scale('xDiv', datum.saldo) - nameW) < 90) : ((totalWidth - scale('xDiv', datum.saldo)) < 90)) ? '#ffffff' : (datum.semDado ? '#7a7f85' : (datum.saldo < 0 ? '#e15759' : '#009e47'))"},
               "opacity": {"signal": "tEase"}
             }
           }
